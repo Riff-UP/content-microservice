@@ -15,11 +15,8 @@ export class CreatePostDto {
     title!: string;
 
     @IsUrl()
-    content!: string;
-
     @IsString()
-    @IsNotEmpty()
-    provider!: string;
+    url!: string;
 
     @IsString()
     @IsNotEmpty()

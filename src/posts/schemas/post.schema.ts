@@ -15,10 +15,7 @@ export class Post {
     title!: string;
 
     @Prop({required: true})
-    content!: string;
-
-    @Prop({required: true})
-    provider!: string;
+    url!: string;
 
     @Prop({required: true})
     description!: string;
