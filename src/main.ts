@@ -5,19 +5,25 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
 
 async function bootstrap() {
+  const logger = new Logger('Content-MS');
 
-  const logger = new Logger('Content-MS')
+  const app = await NestFactory.create(AppModule);
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.TCP,
-      options:{
-        port: envs.port,
-      }
-    }
-  );
-  await app.listen();
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [envs.rabbit_url],
+      queue: 'content.queue',
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
+  //Inicialización de rabbit
+  await app.startAllMicroservices();
+
+  await app.listen(envs.port);
 
   logger.log(`Application is running on port ${envs.port}`);
 }
