@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  content-db:
+    image: mongo:6.0
+    container_name: riff_content
+    restart: always
+    volumes:
+      - ./mongo_data:/data/db
+    ports:
+      - ${DB_PORT}:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+    networks:
+      - content-network
+networks:
+  content-network:
+    driver: bridge
