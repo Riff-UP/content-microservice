@@ -19,7 +19,7 @@ export class EventsController {
   }
 
   @MessagePattern('findOneEvent')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.eventsService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class EventsController {
   }
 
   @MessagePattern('removeEvent')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.eventsService.remove(id);
   }
 }
