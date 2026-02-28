@@ -5,10 +5,10 @@ export type PostDocument = HydratedDocument<Post>;
 
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: false } })
 export class Post {
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   sql_user_id!: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   type!: string;
 
   @Prop({ required: true })
@@ -21,3 +21,5 @@ export class Post {
   description!: string;
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
+// index created_at for fast recent queries
+PostSchema.index({ created_at: -1 });
