@@ -25,7 +25,10 @@ export class EventReviewsController {
 
   @MessagePattern('updateEventReview')
   update(@Payload() updateEventReviewDto: UpdateEventReviewDto) {
-    return this.eventReviewsService.update(updateEventReviewDto.id, updateEventReviewDto);
+    return this.eventReviewsService.update(
+      updateEventReviewDto.id,
+      updateEventReviewDto,
+    );
   }
 
   @MessagePattern('removeEventReview')

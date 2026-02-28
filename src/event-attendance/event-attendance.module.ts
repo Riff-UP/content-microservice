@@ -2,13 +2,18 @@ import { Module } from '@nestjs/common';
 import { EventAttendanceService } from './event-attendance.service';
 import { EventAttendanceController } from './event-attendance.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EventAttendance, EventAttendanceSchema } from './schemas/event-attendance.schema';
+import {
+  EventAttendance,
+  EventAttendanceSchema,
+} from './schemas/event-attendance.schema';
 
 @Module({
   controllers: [EventAttendanceController],
   providers: [EventAttendanceService],
   imports: [
-    MongooseModule.forFeature([{ name: EventAttendance.name, schema : EventAttendanceSchema}])
-  ]
+    MongooseModule.forFeature([
+      { name: EventAttendance.name, schema: EventAttendanceSchema },
+    ]),
+  ],
 })
 export class EventAttendanceModule {}

@@ -6,7 +6,9 @@ import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
 
 @Controller()
 export class EventAttendanceController {
-  constructor(private readonly eventAttendanceService: EventAttendanceService) {}
+  constructor(
+    private readonly eventAttendanceService: EventAttendanceService,
+  ) {}
 
   @MessagePattern('createEventAttendance')
   create(@Payload() createEventAttendanceDto: CreateEventAttendanceDto) {
@@ -25,7 +27,10 @@ export class EventAttendanceController {
 
   @MessagePattern('updateEventAttendance')
   update(@Payload() updateEventAttendanceDto: UpdateEventAttendanceDto) {
-    return this.eventAttendanceService.update(updateEventAttendanceDto.id, updateEventAttendanceDto);
+    return this.eventAttendanceService.update(
+      updateEventAttendanceDto.id,
+      updateEventAttendanceDto,
+    );
   }
 
   @MessagePattern('removeEventAttendance')

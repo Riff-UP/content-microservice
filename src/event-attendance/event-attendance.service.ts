@@ -7,49 +7,50 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class EventAttendanceService {
-
   constructor(
-    @InjectModel(EventAttendance.name) private readonly eventAttendanceService : Model<EventAttendance>
-  ){}
+    @InjectModel(EventAttendance.name)
+    private readonly eventAttendanceService: Model<EventAttendance>,
+  ) {}
 
   async create(createEventAttendanceDto: CreateEventAttendanceDto) {
-    return await this.eventAttendanceService.create(createEventAttendanceDto)
+    return await this.eventAttendanceService.create(createEventAttendanceDto);
   }
 
   async findAll() {
-    return await this.eventAttendanceService.find().exec()
+    return await this.eventAttendanceService.find().exec();
   }
 
   async findOne(id: number) {
+    const attendance = await this.eventAttendanceService.findById(id).exec();
 
-    const attendance = await this.eventAttendanceService.findById(id).exec()
-
-    if(!attendance){
-      throw new Error(`Attendance with id ${id} not found`)
+    if (!attendance) {
+      throw new Error(`Attendance with id ${id} not found`);
     }
 
-    return attendance
+    return attendance;
   }
 
   async update(id: number, updateEventAttendanceDto: UpdateEventAttendanceDto) {
+    const attendanceUpdated = await this.eventAttendanceService
+      .findByIdAndUpdate(id)
+      .exec();
 
-    const attendanceUpdated = await this.eventAttendanceService.findByIdAndUpdate(id).exec()
-
-    if(!attendanceUpdated){
-      throw new Error(`Attendance with id ${id} not found`)
+    if (!attendanceUpdated) {
+      throw new Error(`Attendance with id ${id} not found`);
     }
 
-    return attendanceUpdated
+    return attendanceUpdated;
   }
 
   async remove(id: number) {
+    const deletedAttendance = await this.eventAttendanceService
+      .findByIdAndDelete(id)
+      .exec();
 
-    const deletedAttendance = await this.eventAttendanceService.findByIdAndDelete(id).exec()
-
-    if(!deletedAttendance){
-      throw new Error(`Attendance with id ${id} not found`)
+    if (!deletedAttendance) {
+      throw new Error(`Attendance with id ${id} not found`);
     }
 
-    return deletedAttendance
+    return deletedAttendance;
   }
 }

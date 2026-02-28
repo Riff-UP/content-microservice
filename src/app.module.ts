@@ -13,15 +13,15 @@ import { envs } from './config/envs';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
+      envFilePath: '.env',
     }),
     MongooseModule.forRoot(envs.mongoUri),
-    PostsModule, 
-    EventsModule, 
-    EventAttendanceModule, 
-    EventReviewsModule, 
-    PostReactionsModule, 
-    SavedPostsModule
+    PostsModule,
+    EventsModule,
+    EventAttendanceModule,
+    EventReviewsModule,
+    PostReactionsModule,
+    SavedPostsModule,
   ],
   controllers: [],
   providers: [],

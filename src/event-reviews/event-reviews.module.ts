@@ -8,7 +8,9 @@ import { EventReview, EventReviewSchema } from './schemas/event-reviews.schema';
   controllers: [EventReviewsController],
   providers: [EventReviewsService],
   imports: [
-    MongooseModule.forFeature([{name: EventReview.name, schema: EventReviewSchema}])
-  ]
+    MongooseModule.forFeature([
+      { name: EventReview.name, schema: EventReviewSchema },
+    ]),
+  ],
 })
 export class EventReviewsModule {}

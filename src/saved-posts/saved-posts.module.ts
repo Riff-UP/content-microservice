@@ -8,7 +8,9 @@ import { SavedPost, SavedPostSchema } from './schemas/saved-post.schema';
   controllers: [SavedPostsController],
   providers: [SavedPostsService],
   imports: [
-    MongooseModule.forFeature([{ name: SavedPost.name, schema: SavedPostSchema}])
-  ]
+    MongooseModule.forFeature([
+      { name: SavedPost.name, schema: SavedPostSchema },
+    ]),
+  ],
 })
 export class SavedPostsModule {}

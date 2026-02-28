@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateEventReviewDto {
-    @IsString()
-    @IsNotEmpty()
-    event_id!: string
+  @IsString()
+  @IsNotEmpty()
+  event_id!: string;
 
-    @IsString()
-    @IsNotEmpty()
-    sql_user_id!: string
+  @IsString()
+  @IsNotEmpty()
+  sql_user_id!: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    rating!: number
+  @IsNumber()
+  @IsNotEmpty()
+  rating!: number;
 }

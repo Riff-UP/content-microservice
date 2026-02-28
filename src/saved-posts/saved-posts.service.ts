@@ -7,13 +7,13 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class SavedPostsService {
-
   constructor(
-    @InjectModel(SavedPost.name) private readonly savedPostModel: Model<SavedPost>
-  ){}
+    @InjectModel(SavedPost.name)
+    private readonly savedPostModel: Model<SavedPost>,
+  ) {}
 
   async create(createSavedPostDto: any) {
-    return await this.savedPostModel.create(createSavedPostDto)
+    return await this.savedPostModel.create(createSavedPostDto);
   }
 
   async findAll() {
@@ -21,24 +21,28 @@ export class SavedPostsService {
   }
 
   async findOne(id: number) {
-    const savedPost = await this.savedPostModel.findById(id).exec()
+    const savedPost = await this.savedPostModel.findById(id).exec();
 
-    if(!savedPost){
-      throw new Error(`Saved post with id ${id} not found`)
+    if (!savedPost) {
+      throw new Error(`Saved post with id ${id} not found`);
     }
-    return savedPost
+    return savedPost;
   }
 
   async update(id: number, updateSavedPostDto: UpdateSavedPostDto) {
-    return await this.savedPostModel.findByIdAndUpdate(id, updateSavedPostDto, {new: true})
+    return await this.savedPostModel.findByIdAndUpdate(id, updateSavedPostDto, {
+      new: true,
+    });
   }
 
   async remove(id: number) {
-    const deletedSavedPost = await this.savedPostModel.findByIdAndDelete(id).exec()
+    const deletedSavedPost = await this.savedPostModel
+      .findByIdAndDelete(id)
+      .exec();
 
-    if(!deletedSavedPost){
-      throw new Error(`Saved post with id ${id} not found`)
+    if (!deletedSavedPost) {
+      throw new Error(`Saved post with id ${id} not found`);
     }
-    return deletedSavedPost
+    return deletedSavedPost;
   }
 }

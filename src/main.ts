@@ -4,9 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
 
-async function bootstrap() {
-
-  const logger = new Logger('Content-MS')
+async function bootstra  const logger = new Logger('Content-MS');
 
   const app = await NestFactory.create(AppModule);
 
@@ -14,24 +12,27 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true
-    })
-  )
+      transform: true,
+    }),
+  );
 
   app.connectMicroservice({
     transport: Transport.TCP,
     options: {
       host: envs.host,
-      port: envs.port
-    }
-  })
+      port: envs.port,
+    },
+  });
 
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
       urls: [envs.rabbitUrl],
       queue: 'riff_queue',
-      queueOptions: {durable: true}
+      queueOptions: { durable: true },
+    },
+  });
+ns: { durable: true }
     }
   })
 
