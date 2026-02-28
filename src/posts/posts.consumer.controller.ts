@@ -9,8 +9,5 @@ export class postsConsumerController {
   async handleFollowEvent(@Payload() data: AuthTokenGeneratedDto) {
     console.log('Evento recibido en consumer:', data);
     const { user, token } = data;
-
-    
-
   }
 }

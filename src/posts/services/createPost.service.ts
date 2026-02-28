@@ -5,7 +5,6 @@ import { Mongoose } from 'mongoose';
 export class createPostService implements OnModuleInit {
   private readonly logger = new Logger('PostCreationService');
 
-
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
   }

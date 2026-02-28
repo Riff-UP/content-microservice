@@ -4,7 +4,8 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
 
-async function bootstra  const logger = new Logger('Content-MS');
+async function bootstrap() {
+  const logger = new Logger('Content-MS');
 
   const app = await NestFactory.create(AppModule);
 
@@ -16,7 +17,7 @@ async function bootstra  const logger = new Logger('Content-MS');
     }),
   );
 
-  app.connectMicroservice({
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
     options: {
       host: envs.host,
@@ -24,7 +25,7 @@ async function bootstra  const logger = new Logger('Content-MS');
     },
   });
 
-  app.connectMicroservice({
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
       urls: [envs.rabbitUrl],
@@ -32,12 +33,11 @@ async function bootstra  const logger = new Logger('Content-MS');
       queueOptions: { durable: true },
     },
   });
-ns: { durable: true }
-    }
-  })
 
   await app.startAllMicroservices();
+  await app.listen(envs.port);
 
   logger.log(`Application is running on port ${envs.port}`);
 }
+
 bootstrap();
