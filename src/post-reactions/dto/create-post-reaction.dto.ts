@@ -8,4 +8,8 @@ export class CreatePostReactionDto {
   @IsString()
   @IsNotEmpty()
   post_id!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  type!: string;
 }
