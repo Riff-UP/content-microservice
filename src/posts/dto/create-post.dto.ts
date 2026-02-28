@@ -1,10 +1,4 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -12,19 +6,23 @@ export class CreatePostDto {
   sql_user_id!: string;
 
   @IsString()
-  @IsEnum(['image, audio'])
-  type!: string;
+  @IsIn(['image', 'audio'])
+  type!: 'image' | 'audio';
 
   @IsString()
   @IsNotEmpty()
   title!: string;
 
+  @IsOptional()
   @IsUrl()
   @IsString()
-  url!: string;
+  url?: string;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
-  description!: string;
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }

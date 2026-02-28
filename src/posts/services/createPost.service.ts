@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../schemas/post.schema';
 import { CreatePostDto } from '../dto/create-post.dto';
+import { UploadService } from '../../utils/services/upload.service';
 
 @Injectable()
 export class createPostService implements OnModuleInit {
@@ -10,6 +11,7 @@ export class createPostService implements OnModuleInit {
 
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
+    private readonly uploadService: UploadService,
   ) {}
 
   onModuleInit() {
@@ -17,7 +19,12 @@ export class createPostService implements OnModuleInit {
   }
 
   async create(createPostDto: CreatePostDto) {
-    const post = await this.postModel.create(createPostDto as any);
+    // Normalize and validate provider links if present
+    const normalized = this.uploadService.normalizePostPayload(
+      createPostDto as any,
+    );
+
+    const post = await this.postModel.create(normalized as any);
     this.logger.log(`Post created: ${post.id}`);
     return post;
   }

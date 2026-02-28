@@ -15,7 +15,7 @@ export class Post {
   title!: string;
 
   @Prop({ required: true })
-  url!: string;
+  url?: string;
 
   @Prop({ required: true })
   description!: string;
