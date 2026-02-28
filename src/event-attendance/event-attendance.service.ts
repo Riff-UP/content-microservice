@@ -1,26 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEventAttendanceDto } from './dto/create-event-attendance.dto';
 import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { EventAttendance } from './schemas/event-attendance.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class EventAttendanceService {
-  create(createEventAttendanceDto: CreateEventAttendanceDto) {
-    return 'This action adds a new eventAttendance';
+  constructor(
+    @InjectModel(EventAttendance.name)
+    private readonly eventAttendanceService: Model<EventAttendance>,
+  ) {}
+
+  async create(createEventAttendanceDto: CreateEventAttendanceDto) {
+    return await this.eventAttendanceService.create(createEventAttendanceDto);
   }
 
-  findAll() {
-    return `This action returns all eventAttendance`;
+  async findAll() {
+    return await this.eventAttendanceService.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} eventAttendance`;
+  async findOne(id: number) {
+    const attendance = await this.eventAttendanceService.findById(id).exec();
+
+    if (!attendance) {
+      throw new Error(`Attendance with id ${id} not found`);
+    }
+
+    return attendance;
   }
 
-  update(id: number, updateEventAttendanceDto: UpdateEventAttendanceDto) {
-    return `This action updates a #${id} eventAttendance`;
+  async update(id: number, updateEventAttendanceDto: UpdateEventAttendanceDto) {
+    const attendanceUpdated = await this.eventAttendanceService
+      .findByIdAndUpdate(id)
+      .exec();
+
+    if (!attendanceUpdated) {
+      throw new Error(`Attendance with id ${id} not found`);
+    }
+
+    return attendanceUpdated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} eventAttendance`;
+  async remove(id: number) {
+    const deletedAttendance = await this.eventAttendanceService
+      .findByIdAndDelete(id)
+      .exec();
+
+    if (!deletedAttendance) {
+      throw new Error(`Attendance with id ${id} not found`);
+    }
+
+    return deletedAttendance;
   }
 }

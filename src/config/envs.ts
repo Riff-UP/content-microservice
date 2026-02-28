@@ -3,12 +3,14 @@ import 'dotenv/config';
 
 interface EnvVars {
   PORT: number;
+  MONGO_URI: string;
   RABBIT_URL: string;
 }
 
 const envSchema = joi
   .object({
     PORT: joi.number().required(),
+    MONGO_URI: joi.string().required(),
     RABBIT_URL: joi.string().required(),
   })
   .unknown(true);
@@ -23,5 +25,7 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
-  rabbit_url: envVars.RABBIT_URL,
+  host: process.env.CONTENT_MS_HOST || '0.0.0.0',
+  mongoUri: envVars.MONGO_URI,
+  rabbitUrl: envVars.RABBIT_URL,
 };

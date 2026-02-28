@@ -17,7 +17,7 @@ export class SavedPostsController {
   findAll() {
     return this.savedPostsService.findAll();
   }
-  
+
   @MessagePattern('removeSavedPost')
   remove(@Payload() id: number) {
     return this.savedPostsService.remove(id);
