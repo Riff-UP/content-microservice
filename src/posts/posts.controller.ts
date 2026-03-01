@@ -1,35 +1,35 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { PostsService } from './posts.service';
+import { createPostService } from './services/createPost.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { UsersService } from '../users/users.service';
 
 @Controller()
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  private readonly logger = new Logger(PostsController.name);
+
+  constructor(
+    private readonly createPostService: createPostService,
+    private readonly usersService: UsersService,
+  ) { }
 
   @MessagePattern('createPost')
-  create(@Payload() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
-  }
+  async create(@Payload() createPostDto: CreatePostDto) {
+    // Look up cached auth info (token + user) from auth.tokenGenerated event
+    const cached = await this.usersService.get(
+      Number(createPostDto.sql_user_id),
+    );
 
-  @MessagePattern('findAllPosts')
-  findAll() {
-    return this.postsService.findAll();
-  }
+    if (!cached || !cached._token) {
+      this.logger.error(
+        `No cached auth token for user ${createPostDto.sql_user_id}. ` +
+        'Ensure auth.tokenGenerated was received before creating a post.',
+      );
+      throw new Error(
+        'Auth token not available. User must be authenticated first.',
+      );
+    }
 
-  @MessagePattern('findOnePost')
-  findOne(@Payload() id: number) {
-    return this.postsService.findOne(id);
-  }
-
-  @MessagePattern('updatePost')
-  update(@Payload() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(updatePostDto.id, updatePostDto);
-  }
-
-  @MessagePattern('removePost')
-  remove(@Payload() id: number) {
-    return this.postsService.remove(id);
+    return this.createPostService.create(createPostDto, cached);
   }
 }

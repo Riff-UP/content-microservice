@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { postsConsumerController } from './posts.consumer.controller';
 import { createPostService } from './services/createPost.service';
@@ -10,10 +9,10 @@ import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [PostsController, postsConsumerController],
-  providers: [PostsService, createPostService, UploadService],
+  providers: [createPostService, UploadService],
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     UsersModule,
   ],
 })
-export class PostsModule {}
+export class PostsModule { }
