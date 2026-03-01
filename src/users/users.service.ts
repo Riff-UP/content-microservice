@@ -10,7 +10,7 @@ export class UsersService {
   constructor(
     @InjectModel(UserRef.name)
     private readonly userRefModel: Model<UserRefDocument>,
-  ) { }
+  ) {}
 
   /**
    * Upsert user replica from auth.tokenGenerated event.

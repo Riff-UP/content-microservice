@@ -24,24 +24,22 @@ export class EventAttendanceService {
   async findOne(id: string) {
     const attendance = await this.eventAttendanceModel.findById(id).exec();
 
-    if (!attendance) RpcExceptionHelper.notFound('EventAttendance', id)
+    if (!attendance) RpcExceptionHelper.notFound('EventAttendance', id);
 
     return attendance!;
   }
 
   async update(id: string, updateEventAttendanceDto: UpdateEventAttendanceDto) {
-    await this.findOne(id)
+    await this.findOne(id);
 
-    return await this.eventAttendanceModel.findByIdAndUpdate(
-      id,
-      updateEventAttendanceDto,
-      {new: true}
-    ).exec()
+    return await this.eventAttendanceModel
+      .findByIdAndUpdate(id, updateEventAttendanceDto, { new: true })
+      .exec();
   }
 
   async remove(id: string) {
-    await this.findOne(id)
+    await this.findOne(id);
 
-    return await this.eventAttendanceModel.findByIdAndDelete(id).exec()
+    return await this.eventAttendanceModel.findByIdAndDelete(id).exec();
   }
 }

@@ -5,26 +5,26 @@ export type UserRefDocument = HydratedDocument<UserRef>;
 
 @Schema({ timestamps: true })
 export class UserRef {
-    @Prop({ required: true, unique: true, index: true })
-    user_id!: string;
+  @Prop({ required: true, unique: true, index: true })
+  user_id!: string;
 
-    @Prop()
-    name?: string;
+  @Prop()
+  name?: string;
 
-    @Prop()
-    email?: string;
+  @Prop()
+  email?: string;
 
-    @Prop()
-    googleId?: string;
+  @Prop()
+  googleId?: string;
 
-    @Prop()
-    picture?: string;
+  @Prop()
+  picture?: string;
 
-    @Prop()
-    role?: string;
+  @Prop()
+  role?: string;
 
-    @Prop()
-    token?: string;
+  @Prop()
+  token?: string;
 }
 
 export const UserRefSchema = SchemaFactory.createForClass(UserRef);

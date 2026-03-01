@@ -1,1 +1,1 @@
-export * from './helpers/rpc-exception.helper'
+export * from './helpers/rpc-exception.helper';

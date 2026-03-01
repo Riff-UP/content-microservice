@@ -14,4 +14,4 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
 })
-export class EventsModule { }
+export class EventsModule {}

@@ -53,7 +53,7 @@ export class EventsService {
   async findOne(id: string) {
     const event = await this.eventModel.findById(id).exec();
 
-    if (!event) RpcExceptionHelper.notFound('Event', id)
+    if (!event) RpcExceptionHelper.notFound('Event', id);
     return event!;
   }
 

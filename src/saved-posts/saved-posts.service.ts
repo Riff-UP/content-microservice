@@ -24,19 +24,17 @@ export class SavedPostsService {
   async findOne(id: string) {
     const savedPost = await this.savedPostModel.findById(id).exec();
 
-    if (!savedPost) RpcExceptionHelper.notFound('savedPost', id)
-    
+    if (!savedPost) RpcExceptionHelper.notFound('savedPost', id);
+
     return savedPost!;
   }
 
   async update(id: string, updateSavedPostDto: UpdateSavedPostDto) {
     await this.findOne(id);
 
-    return await this.savedPostModel.findByIdAndUpdate(
-      id,
-      updateSavedPostDto,
-      { new: true }
-    ).exec();
+    return await this.savedPostModel
+      .findByIdAndUpdate(id, updateSavedPostDto, { new: true })
+      .exec();
   }
 
   async remove(id: string) {

@@ -8,11 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../schemas/post.schema';
 import { CreatePostDto } from '../dto/create-post.dto';
-import { UploadService } from '../../utils/services/upload.service';
+import {
+  UploadService,
+  NormalizedPostPayload,
+} from '../../utils/services/upload.service';
+import { StorageService } from '../../utils/services/storage.service';
 import { resolveSoundCloud } from './helpers/resolveSoundCloud';
 import { isImageUrl } from './helpers/isImageUrl';
-import { saveImageToDisk } from './helpers/saveImageToDisk';
-import { toPublicUploadsPath } from './helpers/toPublicUploadsPath';
+import { saveImageToR2 } from './helpers/saveImageToR2';
 
 @Injectable()
 export class createPostService implements OnModuleInit {
@@ -21,27 +24,31 @@ export class createPostService implements OnModuleInit {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly uploadService: UploadService,
-  ) { }
+    private readonly storageService: StorageService,
+  ) {}
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
   }
 
-  async create(createPostDto: CreatePostDto, auth?: Record<string, any>) {
+  async create(createPostDto: CreatePostDto, auth?: { _token?: string }) {
     // Normalize payload (shared validations)
-    const normalized = this.uploadService.normalizePostPayload(
-      createPostDto as any,
-    );
+    const normalized: NormalizedPostPayload =
+      this.uploadService.normalizePostPayload(
+        createPostDto as unknown as Record<string, unknown>,
+      );
 
-    const type = (normalized.type || '').toString().toLowerCase();
-    const url = (normalized.url || '').toString();
+    const url = normalized.url ?? '';
 
     // Require auth token to proceed (we use it for inserts/downloads)
     if (!auth || !auth._token) {
       throw new BadRequestException('Auth token is required to create a post');
     }
 
-    if (normalized.provider && (normalized.provider || '').toString().toLowerCase() === 'soundcloud') {
+    if (
+      normalized.provider &&
+      normalized.provider.toLowerCase() === 'soundcloud'
+    ) {
       // Handle SoundCloud provider: resolve oEmbed, persist provider_meta and media url
       const resolved = await resolveSoundCloud(url);
       normalized.type = 'audio';
@@ -55,21 +62,25 @@ export class createPostService implements OnModuleInit {
       }
 
       if (!isImageUrl(url)) {
-        throw new BadRequestException('Provided URL does not look like an image');
+        throw new BadRequestException(
+          'Provided URL does not look like an image',
+        );
       }
 
       // ensure type set to 'image'
       normalized.type = 'image';
 
-      // Save image to disk and replace url with local path
-      const savedPath = await saveImageToDisk(normalized.url, auth._token);
-      // savedPath is absolute on disk; persist a web-accessible path under /uploads
-      const publicPath = toPublicUploadsPath(savedPath);
-      normalized.url = publicPath;
+      // Upload image to Cloudflare R2 and get public URL
+      const publicUrl = await saveImageToR2(
+        normalized.url ?? '',
+        this.storageService,
+        auth._token,
+      );
+      normalized.url = publicUrl;
     }
 
-    const post = await this.postModel.create(normalized as any);
-    this.logger.log(`Post created: ${post.id}`);
+    const post = await this.postModel.create(normalized);
+    this.logger.log(`Post created: ${String(post._id)}`);
     return post;
   }
 }

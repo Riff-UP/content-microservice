@@ -24,18 +24,16 @@ export class EventReviewsService {
   async findOne(id: string) {
     const review = await this.eventReviewModel.findById(id).exec();
 
-    if (!review) RpcExceptionHelper.notFound('eventReview', id)
+    if (!review) RpcExceptionHelper.notFound('eventReview', id);
 
     return review!;
   }
 
   async update(id: string, updateEventReviewDto: UpdateEventReviewDto) {
     await this.findOne(id);
-    return await this.eventReviewModel.findByIdAndUpdate(
-      id,
-      updateEventReviewDto,
-      { new: true }
-    ).exec();
+    return await this.eventReviewModel
+      .findByIdAndUpdate(id, updateEventReviewDto, { new: true })
+      .exec();
   }
 
   async remove(id: string) {
