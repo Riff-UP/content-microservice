@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreatePostReactionDto {
   @IsString()
@@ -11,5 +11,6 @@ export class CreatePostReactionDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsIn(['like', 'love', 'fire', 'applause'])
   type!: string;
 }

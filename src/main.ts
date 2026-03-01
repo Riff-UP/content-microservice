@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
+import { GlobalRpcExceptionFilter, RpcResponseInterceptor } from './common';
 
 async function bootstrap() {
   const logger = new Logger('Content-MS');
@@ -16,6 +17,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.useGlobalFilters(new GlobalRpcExceptionFilter());
+  app.useGlobalInterceptors(new RpcResponseInterceptor());
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
@@ -42,4 +46,4 @@ async function bootstrap() {
   logger.log(`Microservicio TCP escuchando en el puerto ${envs.tcpPort}`);
 }
 
-bootstrap();
+void bootstrap();

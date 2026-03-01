@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  OnModuleInit,
-  Logger,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -22,6 +17,7 @@ import { StorageService } from '../../utils/services/storage.service';
 import { resolveSoundCloud } from './helpers/resolveSoundCloud';
 import { isImageUrl } from './helpers/isImageUrl';
 import { saveImageToR2 } from './helpers/saveImageToR2';
+import { RpcExceptionHelper } from '../../common';
 
 @Injectable()
 export class createPostService implements OnModuleInit {
@@ -58,7 +54,8 @@ export class createPostService implements OnModuleInit {
 
     // Require auth token to proceed (we use it for inserts/downloads)
     if (!auth || !auth._token) {
-      throw new BadRequestException('Auth token is required to create a post');
+      RpcExceptionHelper.badRequest('Auth token is required to create a post');
+      return; // unreachable — RpcExceptionHelper throws, but helps TS narrowing
     }
 
     if (
@@ -73,11 +70,11 @@ export class createPostService implements OnModuleInit {
     } else {
       // Assume image flow
       if (!contentUrl) {
-        throw new BadRequestException('Image URL is required');
+        RpcExceptionHelper.badRequest('Image URL is required');
       }
 
       if (!isImageUrl(contentUrl)) {
-        throw new BadRequestException(
+        RpcExceptionHelper.badRequest(
           'Provided URL does not look like an image',
         );
       }

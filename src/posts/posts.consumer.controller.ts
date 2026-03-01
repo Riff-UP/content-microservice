@@ -15,7 +15,7 @@ export class postsConsumerController {
     try {
       await this.usersService.upsert(data.user, data.token);
       this.logger.log(
-        `User ref upserted: ${data.user?.id || (data.user as any)?.user_id}`,
+        `User ref upserted: ${data.user?.id || data.user?.user_id}`,
       );
     } catch (err) {
       this.logger.error('Failed to upsert user ref', err);

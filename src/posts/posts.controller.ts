@@ -9,6 +9,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { UsersService } from '../users/users.service';
 import { UserRefDocument } from '../users/schemas/user-ref.schema';
+import { RpcExceptionHelper, PaginationDto } from '../common';
 
 @Controller()
 export class PostsController {
@@ -34,7 +35,10 @@ export class PostsController {
         `No user ref found for ${createPostDto.sql_user_id}. ` +
           'Ensure auth.tokenGenerated was received.',
       );
-      throw new Error('User not replicated yet. Authenticate first.');
+      RpcExceptionHelper.unauthorized(
+        'User not replicated yet. Authenticate first.',
+      );
+      return; // unreachable — RpcExceptionHelper throws, but helps TS narrowing
     }
 
     return this.createPostService.create(createPostDto, {
@@ -43,8 +47,8 @@ export class PostsController {
   }
 
   @MessagePattern('findAllPosts')
-  findAll() {
-    return this.findAllPostsService.execute();
+  findAll(@Payload() pagination: PaginationDto) {
+    return this.findAllPostsService.execute(pagination);
   }
 
   @MessagePattern('findOnePost')

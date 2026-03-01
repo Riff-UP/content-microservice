@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event, EventDocument } from '../schemas/event.schema';
+import { PaginationDto, PaginatedResult } from '../../common';
 
 @Injectable()
 export class FindAllEventsService {
@@ -13,11 +14,36 @@ export class FindAllEventsService {
   ) {}
 
   /**
-   * Returns all events, sorted by newest first.
+   * Returns paginated events, sorted by newest first.
    */
-  async execute(): Promise<EventDocument[]> {
-    const events = await this.eventModel.find().sort({ created_at: -1 }).exec();
-    this.logger.log(`Found ${events.length} events`);
-    return events;
+  async execute(
+    pagination?: PaginationDto,
+  ): Promise<PaginatedResult<EventDocument>> {
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.eventModel
+        .find()
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.eventModel.countDocuments().exec(),
+    ]);
+
+    this.logger.log(
+      `Found ${data.length} events (page ${page}/${Math.ceil(total / limit)})`,
+    );
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+        limit,
+      },
+    };
   }
 }

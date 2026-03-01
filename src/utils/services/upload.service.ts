@@ -1,4 +1,5 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcExceptionHelper } from '../../common';
 
 export interface NormalizedPostPayload {
   sql_user_id: string;
@@ -17,16 +18,18 @@ export class UploadService {
   validateProviderLink(provider?: string, content?: string) {
     if (!provider) return true;
     if (!content)
-      throw new BadRequestException(
+      RpcExceptionHelper.badRequest(
         'Provider specified but content is missing',
       );
+
+    const url = content ?? '';
 
     switch ((provider || '').toLowerCase()) {
       case 'soundcloud':
         // very small validation: must contain soundcloud domain
-        if (!/soundcloud\.com/.test(content)) {
-          this.logger.warn(`Invalid soundcloud url: ${content}`);
-          throw new BadRequestException('Invalid SoundCloud URL');
+        if (!/soundcloud\.com/.test(url)) {
+          this.logger.warn(`Invalid soundcloud url: ${url}`);
+          RpcExceptionHelper.badRequest('Invalid SoundCloud URL');
         }
         return true;
       default:
@@ -52,7 +55,7 @@ export class UploadService {
     };
 
     if (!dto.sql_user_id || !dto.type || !dto.title) {
-      throw new BadRequestException('Missing required post fields');
+      RpcExceptionHelper.badRequest('Missing required post fields');
     }
 
     // If provider is set, validate link

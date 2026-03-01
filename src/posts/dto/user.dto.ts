@@ -7,6 +7,10 @@ export class UserDto {
 
   @IsOptional()
   @IsString()
+  user_id?: string;
+
+  @IsOptional()
+  @IsString()
   name?: string;
 
   @IsEmail()

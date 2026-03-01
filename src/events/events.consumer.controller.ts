@@ -1,8 +1,8 @@
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEventService } from './services/createEvent.service';
 import { UsersService } from '../users/users.service';
+import { AuthTokenGeneratedDto } from '../posts/dto/generatedToken.dto';
 
 @Controller('events-consumer')
 export class EventsConsumerController {
@@ -14,7 +14,7 @@ export class EventsConsumerController {
   ) {}
 
   @EventPattern('auth.tokenGenerated')
-  async handleAuthToken(@Payload() data: { user: any; token: string }) {
+  async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
     this.logger.log('auth.tokenGenerated received');
     try {
       await this.usersService.upsert(data.user, data.token);
@@ -22,7 +22,7 @@ export class EventsConsumerController {
         `User ref upserted: ${data.user?.id || data.user?.user_id}`,
       );
     } catch (err) {
-      this.logger.error('Failed to upsert user ref', err as any);
+      this.logger.error('Failed to upsert user ref', err);
     }
   }
 }

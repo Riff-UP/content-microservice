@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateEventAttendanceDto {
   @IsString()
@@ -11,5 +11,6 @@ export class CreateEventAttendanceDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsIn(['confirmed', 'pending', 'cancelled'])
   status!: string;
 }

@@ -7,7 +7,7 @@ export function isImageUrl(u: string) {
   try {
     const parsed = new URL(u);
     return imgExt.test(parsed.pathname);
-  } catch (e) {
+  } catch {
     return false;
   }
 }

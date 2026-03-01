@@ -3,6 +3,7 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { CreateEventReviewDto } from './dto/create-event-review.dto';
 import { CreateEventReviewService } from './services/createEventReview.service';
 import { UsersService } from '../users/users.service';
+import { AuthTokenGeneratedDto } from '../posts/dto/generatedToken.dto';
 
 @Controller('event-reviews-consumer')
 export class EventReviewsConsumerController {
@@ -14,7 +15,7 @@ export class EventReviewsConsumerController {
   ) {}
 
   @EventPattern('auth.tokenGenerated')
-  async handleAuthToken(@Payload() data: { user: any; token: string }) {
+  async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
     this.logger.log('auth.tokenGenerated received');
     try {
       await this.usersService.upsert(data.user, data.token);
@@ -22,7 +23,7 @@ export class EventReviewsConsumerController {
         `User ref upserted: ${data.user?.id || data.user?.user_id}`,
       );
     } catch (err) {
-      this.logger.error('Failed to upsert user ref', err as any);
+      this.logger.error('Failed to upsert user ref', err);
     }
   }
 
@@ -33,7 +34,7 @@ export class EventReviewsConsumerController {
       await this.createEventReviewService.execute(payload);
       this.logger.log('Event review persisted from consumer');
     } catch (err) {
-      this.logger.error('Error persisting review from consumer', err as any);
+      this.logger.error('Error persisting review from consumer', err);
     }
   }
 }

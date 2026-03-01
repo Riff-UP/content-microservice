@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   content-db:
     image: mongo:6.0
     container_name: riff_content
     restart: always
     volumes:
-      - ./mongo_data:/data/db
+      - mongo_data:/data/db
     ports:
       - ${DB_PORT}:27017
     environment:
@@ -15,6 +13,26 @@ services:
       - MONGO_INITDB_DATABASE=${DB_NAME}
     networks:
       - content-network
+
+  content-rabbit:
+    image: rabbitmq:3.12-management-alpine
+    container_name: riff_content_rabbit
+    restart: always
+    ports:
+      - ${RABBITMQ_PORT:-5672}:5672
+      - ${RABBITMQ_MANAGEMENT_PORT:-15672}:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    networks:
+      - content-network
+
+volumes:
+  mongo_data:
+  rabbit_data:
+
 networks:
   content-network:
     driver: bridge

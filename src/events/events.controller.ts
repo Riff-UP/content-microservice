@@ -7,6 +7,7 @@ import { FindAllEventsService } from './services/findAllEvents.service';
 import { FindOneEventService } from './services/findOneEvent.service';
 import { UpdateEventService } from './services/updateEvent.service';
 import { RemoveEventService } from './services/removeEvent.service';
+import { PaginationDto } from '../common';
 
 @Controller()
 export class EventsController {
@@ -16,7 +17,7 @@ export class EventsController {
     private readonly findOneEventService: FindOneEventService,
     private readonly updateEventService: UpdateEventService,
     private readonly removeEventService: RemoveEventService,
-  ) { }
+  ) {}
 
   @MessagePattern('createEvent')
   create(@Payload() dto: CreateEventDto) {
@@ -24,8 +25,8 @@ export class EventsController {
   }
 
   @MessagePattern('findAllEvents')
-  findAll() {
-    return this.findAllEventsService.execute();
+  findAll(@Payload() pagination: PaginationDto) {
+    return this.findAllEventsService.execute(pagination);
   }
 
   @MessagePattern('findOneEvent')

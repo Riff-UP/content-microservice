@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from '../schemas/post.schema';
+import { PaginationDto, PaginatedResult } from '../../common';
 
 @Injectable()
 export class FindAllPostsService {
@@ -12,12 +13,37 @@ export class FindAllPostsService {
   ) {}
 
   /**
-   * Returns all posts, sorted by newest first.
+   * Returns paginated posts, sorted by newest first.
    */
-  async execute(): Promise<PostDocument[]> {
-    const posts = await this.postModel.find().sort({ created_at: -1 }).exec();
-    this.logger.log(`Found ${posts.length} posts`);
-    return posts;
+  async execute(
+    pagination?: PaginationDto,
+  ): Promise<PaginatedResult<PostDocument>> {
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.postModel
+        .find()
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.postModel.countDocuments().exec(),
+    ]);
+
+    this.logger.log(
+      `Found ${data.length} posts (page ${page}/${Math.ceil(total / limit)})`,
+    );
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+        limit,
+      },
+    };
   }
 
   /**

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserRef, UserRefDocument } from './schemas/user-ref.schema';
+import { UserDto } from '../posts/dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,7 @@ export class UsersService {
    * Upsert user replica from auth.tokenGenerated event.
    * Stores user info + token in Mongo (user_refs collection).
    */
-  async upsert(user: Record<string, any>, token?: string) {
+  async upsert(user: UserDto, token?: string) {
     if (!user || (!user.user_id && !user.id)) {
       this.logger.warn('upsert called without user_id');
       return null;
@@ -24,7 +25,7 @@ export class UsersService {
 
     const userId = user.user_id || user.id;
 
-    const data: Record<string, any> = {
+    const data: Partial<UserRef> = {
       name: user.name,
       email: user.email,
       googleId: user.googleId,
