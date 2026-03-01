@@ -1,35 +1,45 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { CreateEventService } from './services/createEvent.service';
+import { FindAllEventsService } from './services/findAllEvents.service';
+import { FindOneEventService } from './services/findOneEvent.service';
+import { UpdateEventService } from './services/updateEvent.service';
+import { RemoveEventService } from './services/removeEvent.service';
 
 @Controller()
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly createEventService: CreateEventService,
+    private readonly findAllEventsService: FindAllEventsService,
+    private readonly findOneEventService: FindOneEventService,
+    private readonly updateEventService: UpdateEventService,
+    private readonly removeEventService: RemoveEventService,
+  ) {}
 
   @MessagePattern('createEvent')
-  create(@Payload() createEventDto: CreateEventDto) {
-    return this.eventsService.create(createEventDto);
+  create(@Payload() dto: CreateEventDto) {
+    return this.createEventService.execute(dto);
   }
 
   @MessagePattern('findAllEvents')
   findAll() {
-    return this.eventsService.findAll();
+    return this.findAllEventsService.execute();
   }
 
   @MessagePattern('findOneEvent')
-  findOne(@Payload() id: string) {
-    return this.eventsService.findOne(id);
+  findOne(@Payload() payload: { id: string }) {
+    return this.findOneEventService.execute(payload.id);
   }
 
   @MessagePattern('updateEvent')
-  update(@Payload() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(updateEventDto.id, updateEventDto);
+  update(@Payload() dto: UpdateEventDto) {
+    return this.updateEventService.execute(dto.id, dto);
   }
 
   @MessagePattern('removeEvent')
   remove(@Payload() data: { id: string; followers: string[] }) {
-    return this.eventsService.remove(data.id, data.followers);
+    return this.removeEventService.execute(data.id, data.followers);
   }
 }

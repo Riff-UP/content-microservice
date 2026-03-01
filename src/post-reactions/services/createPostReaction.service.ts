@@ -20,9 +20,7 @@ export class CreatePostReactionService {
    * Toggle a reaction: if the same user+post+type already exists, remove it (un-react);
    * otherwise create it. Returns the created/deleted document and an `action` flag.
    */
-  async execute(
-    dto: CreatePostReactionDto,
-  ): Promise<{
+  async execute(dto: CreatePostReactionDto): Promise<{
     reaction: PostReactionDocument | null;
     action: 'created' | 'removed';
   }> {
