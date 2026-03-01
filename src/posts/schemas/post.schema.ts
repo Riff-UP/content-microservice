@@ -14,13 +14,10 @@ export class Post {
   @Prop({ required: true })
   title!: string;
   @Prop()
-  url?: string;
+  content?: string;
 
   @Prop()
   provider?: string;
-
-  @Prop({ type: Object })
-  provider_meta?: Record<string, any>;
 
   @Prop()
   description?: string;

@@ -11,8 +11,8 @@ export class EventAttendance {
   @Prop({ required: true, index: true })
   sql_user_id!: string;
 
-  @Prop()
-  status?: string;
+  @Prop({ required: true })
+  status!: string;
 }
 export const EventAttendanceSchema =
   SchemaFactory.createForClass(EventAttendance);

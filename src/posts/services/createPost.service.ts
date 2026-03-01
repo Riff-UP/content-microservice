@@ -25,7 +25,7 @@ export class createPostService implements OnModuleInit {
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly uploadService: UploadService,
     private readonly storageService: StorageService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
@@ -38,7 +38,7 @@ export class createPostService implements OnModuleInit {
         createPostDto as unknown as Record<string, unknown>,
       );
 
-    const url = normalized.url ?? '';
+    const contentUrl = normalized.content ?? '';
 
     // Require auth token to proceed (we use it for inserts/downloads)
     if (!auth || !auth._token) {
@@ -50,18 +50,17 @@ export class createPostService implements OnModuleInit {
       normalized.provider.toLowerCase() === 'soundcloud'
     ) {
       // Handle SoundCloud provider: resolve oEmbed, persist provider_meta and media url
-      const resolved = await resolveSoundCloud(url);
+      const resolved = await resolveSoundCloud(contentUrl);
       normalized.type = 'audio';
       normalized.provider = 'soundcloud';
-      normalized.provider_meta = resolved.provider_meta;
-      normalized.url = resolved.media_url; // this is the widget URL the frontend can use
+      normalized.content = resolved.media_url; // this is the widget URL the frontend can use
     } else {
       // Assume image flow
-      if (!url) {
+      if (!contentUrl) {
         throw new BadRequestException('Image URL is required');
       }
 
-      if (!isImageUrl(url)) {
+      if (!isImageUrl(contentUrl)) {
         throw new BadRequestException(
           'Provided URL does not look like an image',
         );
@@ -72,11 +71,11 @@ export class createPostService implements OnModuleInit {
 
       // Upload image to Cloudflare R2 and get public URL
       const publicUrl = await saveImageToR2(
-        normalized.url ?? '',
+        normalized.content ?? '',
         this.storageService,
         auth._token,
       );
-      normalized.url = publicUrl;
+      normalized.content = publicUrl;
     }
 
     const post = await this.postModel.create(normalized);

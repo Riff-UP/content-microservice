@@ -16,7 +16,7 @@ export class CreatePostDto {
   @IsOptional()
   @IsUrl()
   @IsString()
-  url?: string;
+  content?: string;
 
   @IsString()
   @IsOptional()

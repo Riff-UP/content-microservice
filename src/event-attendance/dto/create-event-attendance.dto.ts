@@ -10,6 +10,6 @@ export class CreateEventAttendanceDto {
   sql_user_id!: string;
 
   @IsString()
-  @IsOptional()
-  status?: string;
+  @IsNotEmpty()
+  status!: string;
 }

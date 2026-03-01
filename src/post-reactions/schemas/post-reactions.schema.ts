@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type PostReactionDocument = HydratedDocument<PostReaction>;
 
-@Schema({ timestamps: { createdAt: 'created_at', updatedAt: false } })
+@Schema()
 export class PostReaction {
   @Prop({ required: true, index: true })
   sql_user_id!: string;
@@ -15,6 +15,3 @@ export class PostReaction {
   type!: string;
 }
 export const PostReactionSchema = SchemaFactory.createForClass(PostReaction);
-
-// index created_at to query recent reactions
-PostReactionSchema.index({ created_at: -1 });
