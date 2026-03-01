@@ -1,38 +1,45 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { EventReviewsService } from './event-reviews.service';
 import { CreateEventReviewDto } from './dto/create-event-review.dto';
 import { UpdateEventReviewDto } from './dto/update-event-review.dto';
+import { CreateEventReviewService } from './services/createEventReview.service';
+import { FindReviewsByEventService } from './services/findReviewsByEvent.service';
+import { FindOneEventReviewService } from './services/findOneEventReview.service';
+import { UpdateEventReviewService } from './services/updateEventReview.service';
+import { RemoveEventReviewService } from './services/removeEventReview.service';
 
 @Controller()
 export class EventReviewsController {
-  constructor(private readonly eventReviewsService: EventReviewsService) {}
+  constructor(
+    private readonly createEventReviewService: CreateEventReviewService,
+    private readonly findReviewsByEventService: FindReviewsByEventService,
+    private readonly findOneEventReviewService: FindOneEventReviewService,
+    private readonly updateEventReviewService: UpdateEventReviewService,
+    private readonly removeEventReviewService: RemoveEventReviewService,
+  ) {}
 
   @MessagePattern('createEventReview')
-  create(@Payload() createEventReviewDto: CreateEventReviewDto) {
-    return this.eventReviewsService.create(createEventReviewDto);
+  create(@Payload() dto: CreateEventReviewDto) {
+    return this.createEventReviewService.execute(dto);
   }
 
-  @MessagePattern('findAllEventReviews')
-  findAll() {
-    return this.eventReviewsService.findAll();
+  @MessagePattern('findReviewsByEvent')
+  findByEvent(@Payload() payload: { event_id: string }) {
+    return this.findReviewsByEventService.execute(payload.event_id);
   }
 
   @MessagePattern('findOneEventReview')
-  findOne(@Payload() id: string) {
-    return this.eventReviewsService.findOne(id);
+  findOne(@Payload() payload: { id: string }) {
+    return this.findOneEventReviewService.execute(payload.id);
   }
 
   @MessagePattern('updateEventReview')
-  update(@Payload() updateEventReviewDto: UpdateEventReviewDto) {
-    return this.eventReviewsService.update(
-      updateEventReviewDto.id,
-      updateEventReviewDto,
-    );
+  update(@Payload() dto: UpdateEventReviewDto) {
+    return this.updateEventReviewService.execute(dto.id, dto);
   }
 
   @MessagePattern('removeEventReview')
-  remove(@Payload() id: string) {
-    return this.eventReviewsService.remove(id);
+  remove(@Payload() payload: { id: string }) {
+    return this.removeEventReviewService.execute(payload.id);
   }
 }
