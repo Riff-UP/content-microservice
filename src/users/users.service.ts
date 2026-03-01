@@ -1,37 +1,56 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UsersEvents } from './users.events';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UserRef, UserRefDocument } from './schemas/user-ref.schema';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
-  private cache = new Map<number, any>();
 
-  constructor(private readonly usersEvents: UsersEvents) {}
+  constructor(
+    @InjectModel(UserRef.name)
+    private readonly userRefModel: Model<UserRefDocument>,
+  ) { }
 
   /**
-   * Cache the user info in-memory and emit an in-process event.
-   * Note: in-memory only — no persistence to MongoDB.
+   * Upsert user replica from auth.tokenGenerated event.
+   * Stores user info + token in Mongo (user_refs collection).
    */
-  async upsert(user: Record<string, any>) {
-    if (!user || !user.user_id) {
+  async upsert(user: Record<string, any>, token?: string) {
+    if (!user || (!user.user_id && !user.id)) {
       this.logger.warn('upsert called without user_id');
       return null;
     }
 
-    this.cache.set(user.user_id, user);
-    this.usersEvents.emit('upsert', user);
-    this.logger.log(`User cached: ${user.user_id}`);
-    return user;
+    const userId = user.user_id || user.id;
+
+    const data: Record<string, any> = {
+      name: user.name,
+      email: user.email,
+      googleId: user.googleId,
+      picture: user.picture,
+      role: user.role,
+    };
+
+    if (token) {
+      data.token = token;
+    }
+
+    const updated = await this.userRefModel.findOneAndUpdate(
+      { user_id: userId },
+      { $set: data },
+      { upsert: true, new: true },
+    );
+
+    this.logger.log(`User ref upserted: ${userId}`);
+    return updated;
   }
 
-  /** Return cached user or null. */
-  async get(user_id: number) {
-    if (!user_id) return null;
-    return this.cache.get(user_id) ?? null;
-  }
-
-  /** Clear in-memory cache (useful for tests). */
-  clear() {
-    this.cache.clear();
+  /**
+   * Get cached user replica from Mongo.
+   */
+  async get(userId: string): Promise<UserRefDocument | null> {
+    if (!userId) return null;
+    return this.userRefModel.findOne({ user_id: userId });
   }
 }

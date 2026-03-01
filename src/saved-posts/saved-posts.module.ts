@@ -4,6 +4,7 @@ import { SavedPostsController } from './saved-posts.controller';
 import { SavedPostsConsumerController } from './saved-posts.consumer.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SavedPost, SavedPostSchema } from './schemas/saved-post.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [SavedPostsController, SavedPostsConsumerController],
@@ -12,6 +13,7 @@ import { SavedPost, SavedPostSchema } from './schemas/saved-post.schema';
     MongooseModule.forFeature([
       { name: SavedPost.name, schema: SavedPostSchema },
     ]),
+    UsersModule,
   ],
 })
-export class SavedPostsModule {}
+export class SavedPostsModule { }

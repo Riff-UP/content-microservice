@@ -4,6 +4,7 @@ import { EventReviewsController } from './event-reviews.controller';
 import { EventReviewsConsumerController } from './event-reviews.consumer.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventReview, EventReviewSchema } from './schemas/event-reviews.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [EventReviewsController, EventReviewsConsumerController],
@@ -12,6 +13,7 @@ import { EventReview, EventReviewSchema } from './schemas/event-reviews.schema';
     MongooseModule.forFeature([
       { name: EventReview.name, schema: EventReviewSchema },
     ]),
+    UsersModule,
   ],
 })
-export class EventReviewsModule {}
+export class EventReviewsModule { }

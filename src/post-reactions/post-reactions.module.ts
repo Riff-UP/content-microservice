@@ -7,6 +7,7 @@ import {
   PostReaction,
   PostReactionSchema,
 } from './schemas/post-reactions.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [PostReactionsController, PostReactionsConsumerController],
@@ -15,6 +16,7 @@ import {
     MongooseModule.forFeature([
       { name: PostReaction.name, schema: PostReactionSchema },
     ]),
+    UsersModule,
   ],
 })
-export class PostReactionsModule {}
+export class PostReactionsModule { }

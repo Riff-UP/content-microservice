@@ -7,6 +7,7 @@ import {
   EventAttendance,
   EventAttendanceSchema,
 } from './schemas/event-attendance.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [EventAttendanceController, EventAttendanceConsumerController],
@@ -15,6 +16,7 @@ import {
     MongooseModule.forFeature([
       { name: EventAttendance.name, schema: EventAttendanceSchema },
     ]),
+    UsersModule,
   ],
 })
-export class EventAttendanceModule {}
+export class EventAttendanceModule { }
