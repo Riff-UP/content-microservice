@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { PostsService } from './posts.service';
+import { PostsService } from './services/posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
@@ -19,7 +19,7 @@ export class PostsController {
   }
 
   @MessagePattern('findOnePost')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.postsService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class PostsController {
   }
 
   @MessagePattern('removePost')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.postsService.remove(id);
   }
 }
