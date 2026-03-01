@@ -22,4 +22,4 @@ import { RemoveSavedPostService } from './services/removeSavedPost.service';
     UsersModule,
   ],
 })
-export class SavedPostsModule { }
+export class SavedPostsModule {}

@@ -11,7 +11,7 @@ export class SavedPostsConsumerController {
   constructor(
     private readonly createSavedPostService: CreateSavedPostService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @EventPattern('auth.tokenGenerated')
   async handleAuthToken(@Payload() data: { user: any; token: string }) {

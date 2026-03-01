@@ -1,24 +1,30 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { PostReactionsService } from './post-reactions.service';
 import { CreatePostReactionDto } from './dto/create-post-reaction.dto';
+import { CreatePostReactionService } from './services/createPostReaction.service';
+import { FindReactionsByPostService } from './services/findReactionsByPost.service';
+import { RemovePostReactionService } from './services/removePostReaction.service';
 
 @Controller()
 export class PostReactionsController {
-  constructor(private readonly postReactionsService: PostReactionsService) {}
+  constructor(
+    private readonly createPostReactionService: CreatePostReactionService,
+    private readonly findReactionsByPostService: FindReactionsByPostService,
+    private readonly removePostReactionService: RemovePostReactionService,
+  ) {}
 
   @MessagePattern('createPostReaction')
-  create(@Payload() createPostReactionDto: CreatePostReactionDto) {
-    return this.postReactionsService.create(createPostReactionDto);
+  create(@Payload() dto: CreatePostReactionDto) {
+    return this.createPostReactionService.execute(dto);
   }
 
-  @MessagePattern('findAllPostReactions')
-  findAll() {
-    return this.postReactionsService.findAll();
+  @MessagePattern('findReactionsByPost')
+  findByPost(@Payload() payload: { post_id: string }) {
+    return this.findReactionsByPostService.execute(payload.post_id);
   }
 
   @MessagePattern('removePostReaction')
-  remove(@Payload() id: string) {
-    return this.postReactionsService.remove(id);
+  remove(@Payload() payload: { id: string }) {
+    return this.removePostReactionService.execute(payload.id);
   }
 }

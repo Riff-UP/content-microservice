@@ -11,7 +11,7 @@ export class SavedPostsController {
     private readonly createSavedPostService: CreateSavedPostService,
     private readonly findSavedPostsByUserService: FindSavedPostsByUserService,
     private readonly removeSavedPostService: RemoveSavedPostService,
-  ) { }
+  ) {}
 
   @MessagePattern('createSavedPost')
   create(@Payload() dto: CreateSavedPostDto) {
