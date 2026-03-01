@@ -21,7 +21,7 @@ async function bootstrap() {
     transport: Transport.TCP,
     options: {
       host: envs.host,
-      port: envs.port,
+      port: envs.tcpPort,
     },
   });
 
@@ -38,6 +38,8 @@ async function bootstrap() {
   await app.listen(envs.port);
 
   logger.log(`Application is running on port ${envs.port}`);
+  logger.log(`Servidor HTTP corriendo en el puerto ${envs.port}`);
+  logger.log(`Microservicio TCP escuchando en el puerto ${envs.tcpPort}`)
 }
 
 bootstrap();
