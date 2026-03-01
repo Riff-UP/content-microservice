@@ -29,7 +29,7 @@ export class EventsController {
   }
 
   @MessagePattern('removeEvent')
-  remove(@Payload() id: string) {
-    return this.eventsService.remove(id);
+  remove(@Payload() data: { id: string, followers: string[] }) {
+    return this.eventsService.remove(data.id, data.followers);
   }
 }

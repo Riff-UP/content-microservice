@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateEventAttendanceDto {
   @IsString()
@@ -8,4 +8,8 @@ export class CreateEventAttendanceDto {
   @IsString()
   @IsNotEmpty()
   sql_user_id!: string;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
 }

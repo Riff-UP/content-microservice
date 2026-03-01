@@ -10,6 +10,9 @@ export class PostReaction {
 
   @Prop({ required: true, index: true })
   post_id!: string;
+
+  @Prop({ required: true })
+  type!: string;
 }
 export const PostReactionSchema = SchemaFactory.createForClass(PostReaction);
 

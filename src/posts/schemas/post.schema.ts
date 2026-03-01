@@ -14,10 +14,10 @@ export class Post {
   @Prop({ required: true })
   title!: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   url?: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   description!: string;
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
