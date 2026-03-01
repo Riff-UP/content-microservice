@@ -1,4 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PostsService } from './services/posts.service';
 import { createPostService } from './services/createPost.service';

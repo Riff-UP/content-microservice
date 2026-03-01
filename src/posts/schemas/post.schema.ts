@@ -13,12 +13,17 @@ export class Post {
 
   @Prop({ required: true })
   title!: string;
-
-  @Prop({ required: true })
+  @Prop()
   url?: string;
 
-  @Prop({ required: true })
-  description!: string;
+  @Prop()
+  provider?: string;
+
+  @Prop({ type: Object })
+  provider_meta?: Record<string, any>;
+
+  @Prop()
+  description?: string;
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
 // index created_at for fast recent queries

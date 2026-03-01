@@ -10,7 +10,7 @@ import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [PostsController, postsConsumerController],
-  providers: [PostsService, createPostService, UploadService],
+  providers: [createPostService, UploadService],
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     UsersModule,

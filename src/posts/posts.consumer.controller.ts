@@ -9,15 +9,17 @@ export class postsConsumerController {
 
     constructor(private readonly usersService: UsersService) { }
 
-    @EventPattern('auth.tokenGenerated')
-    async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
-        this.logger.log('Evento auth.tokenGenerated recibido en consumer');
-        const { user, token } = data;
-        try {
-            await this.usersService.upsert(user as any, token);
-            this.logger.log(`User ref upserted: ${user?.id}`);
-        } catch (err) {
-            this.logger.error('Failed to upsert user ref', err as any);
-        }
+  @EventPattern('auth.tokenGenerated')
+  async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
+    this.logger.log('Evento auth.tokenGenerated recibido en consumer');
+    const { user, token } = data;
+    try {
+      // store token together with user in cache so other handlers can use it
+      const merged = { ...(user as any), _token: token };
+      await this.usersService.upsert(merged as any);
+      this.logger.log(`User ref upserted: ${merged?.user_id}`);
+    } catch (err) {
+      this.logger.error('Failed to upsert user ref', err as any);
     }
+  }
 }
