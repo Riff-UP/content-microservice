@@ -11,6 +11,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { envs } from 'src/config';
+import { RpcExceptionHelper } from 'src/common';
 
 @Injectable()
 export class EventsService {
@@ -52,32 +53,22 @@ export class EventsService {
   async findOne(id: string) {
     const event = await this.eventModel.findById(id).exec();
 
-    if (!event) {
-      throw new RpcException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `Event with id ${id} not found`,
-      });
-    }
-    return event;
+    if (!event) RpcExceptionHelper.notFound('Event', id)
+    return event!;
   }
 
   async update(id: string, updateEventDto: UpdateEventDto) {
+    await this.findOne(id);
+
     const { followers, ...eventData } = updateEventDto;
 
     const eventUpdated = await this.eventModel
       .findByIdAndUpdate(id, eventData, { new: true })
       .exec();
 
-    if (!eventUpdated) {
-      throw new RpcException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `Event with id ${id} not found`,
-      });
-    }
-
     this.client.emit('event.update', {
-      artistId: eventUpdated.sql_user_id,
-      eventTitle: eventUpdated.title,
+      artistId: eventUpdated!.sql_user_id,
+      eventTitle: eventUpdated!.title,
       followers: followers ?? [],
     });
 
@@ -85,18 +76,13 @@ export class EventsService {
   }
 
   async remove(id: string, followers: string[] = []) {
-    const eventRemoved = await this.eventModel.findByIdAndDelete(id);
+    await this.findOne(id);
 
-    if (!eventRemoved) {
-      throw new RpcException({
-        status: HttpStatus.NOT_FOUND,
-        message: `Event with id ${id} not found`,
-      });
-    }
+    const eventRemoved = await this.eventModel.findByIdAndDelete(id).exec();
 
     this.client.emit('event.cancelled', {
-      artistId: eventRemoved.sql_user_id,
-      eventTitle: eventRemoved.title,
+      artistId: eventRemoved!.sql_user_id,
+      eventTitle: eventRemoved!.title,
       followers,
     });
 

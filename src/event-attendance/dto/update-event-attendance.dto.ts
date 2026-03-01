@@ -4,5 +4,5 @@ import { CreateEventAttendanceDto } from './create-event-attendance.dto';
 export class UpdateEventAttendanceDto extends PartialType(
   CreateEventAttendanceDto,
 ) {
-  id: number;
+  id: string;
 }

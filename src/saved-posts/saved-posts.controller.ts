@@ -19,7 +19,7 @@ export class SavedPostsController {
   }
 
   @MessagePattern('removeSavedPost')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.savedPostsService.remove(id);
   }
 }

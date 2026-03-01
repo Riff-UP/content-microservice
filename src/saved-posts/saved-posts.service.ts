@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSavedPostDto } from './dto/create-saved-post.dto';
 import { UpdateSavedPostDto } from './dto/update-saved-post.dto';
 import { SavedPost } from './schemas/saved-post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { RpcExceptionHelper } from 'src/common';
+import { CreateSavedPostDto } from './dto';
 
 @Injectable()
 export class SavedPostsService {
@@ -12,7 +13,7 @@ export class SavedPostsService {
     private readonly savedPostModel: Model<SavedPost>,
   ) {}
 
-  async create(createSavedPostDto: any) {
+  async create(createSavedPostDto: CreateSavedPostDto) {
     return await this.savedPostModel.create(createSavedPostDto);
   }
 
@@ -20,29 +21,26 @@ export class SavedPostsService {
     return await this.savedPostModel.find().exec();
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const savedPost = await this.savedPostModel.findById(id).exec();
 
-    if (!savedPost) {
-      throw new Error(`Saved post with id ${id} not found`);
-    }
-    return savedPost;
+    if (!savedPost) RpcExceptionHelper.notFound('savedPost', id)
+    
+    return savedPost!;
   }
 
-  async update(id: number, updateSavedPostDto: UpdateSavedPostDto) {
-    return await this.savedPostModel.findByIdAndUpdate(id, updateSavedPostDto, {
-      new: true,
-    });
+  async update(id: string, updateSavedPostDto: UpdateSavedPostDto) {
+    await this.findOne(id);
+
+    return await this.savedPostModel.findByIdAndUpdate(
+      id,
+      updateSavedPostDto,
+      { new: true }
+    ).exec();
   }
 
-  async remove(id: number) {
-    const deletedSavedPost = await this.savedPostModel
-      .findByIdAndDelete(id)
-      .exec();
-
-    if (!deletedSavedPost) {
-      throw new Error(`Saved post with id ${id} not found`);
-    }
-    return deletedSavedPost;
+  async remove(id: string) {
+    await this.findOne(id);
+    return await this.savedPostModel.findByIdAndDelete(id).exec();
   }
 }

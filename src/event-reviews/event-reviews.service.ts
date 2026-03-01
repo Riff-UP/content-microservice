@@ -4,55 +4,42 @@ import { UpdateEventReviewDto } from './dto/update-event-review.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { EventReview } from './schemas/event-reviews.schema';
 import { Model } from 'mongoose';
+import { RpcExceptionHelper } from 'src/common';
 
 @Injectable()
 export class EventReviewsService {
   constructor(
     @InjectModel(EventReview.name)
-    private readonly eventReviewService: Model<EventReview>,
+    private readonly eventReviewModel: Model<EventReview>,
   ) {}
 
   async create(createEventReviewDto: CreateEventReviewDto) {
-    return await this.eventReviewService.create(createEventReviewDto);
+    return await this.eventReviewModel.create(createEventReviewDto);
   }
 
   async findAll() {
-    return await this.eventReviewService.find().exec();
+    return await this.eventReviewModel.find().exec();
   }
 
-  async findOne(id: number) {
-    const review = await this.eventReviewService.findById(id).exec();
+  async findOne(id: string) {
+    const review = await this.eventReviewModel.findById(id).exec();
 
-    if (!review) {
-      throw new Error(`Review with id ${id} not found`);
-    }
+    if (!review) RpcExceptionHelper.notFound('eventReview', id)
 
-    return review;
+    return review!;
   }
 
-  async update(id: number, updateEventReviewDto: UpdateEventReviewDto) {
-    const reviewUpdated = await this.eventReviewService.findByIdAndUpdate(
+  async update(id: string, updateEventReviewDto: UpdateEventReviewDto) {
+    await this.findOne(id);
+    return await this.eventReviewModel.findByIdAndUpdate(
       id,
       updateEventReviewDto,
-      { new: true },
-    );
-
-    if (!reviewUpdated) {
-      throw new Error(`Review with id ${id} not found`);
-    }
-
-    return reviewUpdated;
+      { new: true }
+    ).exec();
   }
 
-  async remove(id: number) {
-    const reviewDeleted = await this.eventReviewService
-      .findByIdAndDelete(id)
-      .exec();
-
-    if (!reviewDeleted) {
-      throw new Error(`Review with id ${id} not found`);
-    }
-
-    return reviewDeleted;
+  async remove(id: string) {
+    await this.findOne(id);
+    return await this.eventReviewModel.findByIdAndDelete(id).exec();
   }
 }

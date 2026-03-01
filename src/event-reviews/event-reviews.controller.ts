@@ -19,7 +19,7 @@ export class EventReviewsController {
   }
 
   @MessagePattern('findOneEventReview')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.eventReviewsService.findOne(id);
   }
 
@@ -32,7 +32,7 @@ export class EventReviewsController {
   }
 
   @MessagePattern('removeEventReview')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.eventReviewsService.remove(id);
   }
 }

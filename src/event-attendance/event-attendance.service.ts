@@ -4,53 +4,44 @@ import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { EventAttendance } from './schemas/event-attendance.schema';
 import { Model } from 'mongoose';
+import { RpcExceptionHelper } from 'src/common';
 
 @Injectable()
 export class EventAttendanceService {
   constructor(
     @InjectModel(EventAttendance.name)
-    private readonly eventAttendanceService: Model<EventAttendance>,
+    private readonly eventAttendanceModel: Model<EventAttendance>,
   ) {}
 
   async create(createEventAttendanceDto: CreateEventAttendanceDto) {
-    return await this.eventAttendanceService.create(createEventAttendanceDto);
+    return await this.eventAttendanceModel.create(createEventAttendanceDto);
   }
 
   async findAll() {
-    return await this.eventAttendanceService.find().exec();
+    return await this.eventAttendanceModel.find().exec();
   }
 
-  async findOne(id: number) {
-    const attendance = await this.eventAttendanceService.findById(id).exec();
+  async findOne(id: string) {
+    const attendance = await this.eventAttendanceModel.findById(id).exec();
 
-    if (!attendance) {
-      throw new Error(`Attendance with id ${id} not found`);
-    }
+    if (!attendance) RpcExceptionHelper.notFound('EventAttendance', id)
 
-    return attendance;
+    return attendance!;
   }
 
-  async update(id: number, updateEventAttendanceDto: UpdateEventAttendanceDto) {
-    const attendanceUpdated = await this.eventAttendanceService
-      .findByIdAndUpdate(id)
-      .exec();
+  async update(id: string, updateEventAttendanceDto: UpdateEventAttendanceDto) {
+    await this.findOne(id)
 
-    if (!attendanceUpdated) {
-      throw new Error(`Attendance with id ${id} not found`);
-    }
-
-    return attendanceUpdated;
+    return await this.eventAttendanceModel.findByIdAndUpdate(
+      id,
+      updateEventAttendanceDto,
+      {new: true}
+    ).exec()
   }
 
-  async remove(id: number) {
-    const deletedAttendance = await this.eventAttendanceService
-      .findByIdAndDelete(id)
-      .exec();
+  async remove(id: string) {
+    await this.findOne(id)
 
-    if (!deletedAttendance) {
-      throw new Error(`Attendance with id ${id} not found`);
-    }
-
-    return deletedAttendance;
+    return await this.eventAttendanceModel.findByIdAndDelete(id).exec()
   }
 }

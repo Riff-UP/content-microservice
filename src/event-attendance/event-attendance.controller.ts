@@ -21,7 +21,7 @@ export class EventAttendanceController {
   }
 
   @MessagePattern('findOneEventAttendance')
-  findOne(@Payload() id: number) {
+  findOne(@Payload() id: string) {
     return this.eventAttendanceService.findOne(id);
   }
 
@@ -34,7 +34,7 @@ export class EventAttendanceController {
   }
 
   @MessagePattern('removeEventAttendance')
-  remove(@Payload() id: number) {
+  remove(@Payload() id: string) {
     return this.eventAttendanceService.remove(id);
   }
 }
