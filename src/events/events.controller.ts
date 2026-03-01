@@ -16,7 +16,7 @@ export class EventsController {
     private readonly findOneEventService: FindOneEventService,
     private readonly updateEventService: UpdateEventService,
     private readonly removeEventService: RemoveEventService,
-  ) {}
+  ) { }
 
   @MessagePattern('createEvent')
   create(@Payload() dto: CreateEventDto) {
@@ -39,7 +39,7 @@ export class EventsController {
   }
 
   @MessagePattern('removeEvent')
-  remove(@Payload() data: { id: string; followers: string[] }) {
-    return this.removeEventService.execute(data.id, data.followers);
+  remove(@Payload() data: { id: string }) {
+    return this.removeEventService.execute(data.id);
   }
 }

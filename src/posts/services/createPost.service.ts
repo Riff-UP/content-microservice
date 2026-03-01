@@ -6,8 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
 import { Post } from '../schemas/post.schema';
 import { CreatePostDto } from '../dto/create-post.dto';
+import { envs } from '../../config/envs';
 import {
   UploadService,
   NormalizedPostPayload,
@@ -20,12 +26,22 @@ import { saveImageToR2 } from './helpers/saveImageToR2';
 @Injectable()
 export class createPostService implements OnModuleInit {
   private readonly logger = new Logger('PostCreationService');
+  private readonly client: ClientProxy;
 
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly uploadService: UploadService,
     private readonly storageService: StorageService,
-  ) {}
+  ) {
+    this.client = ClientProxyFactory.create({
+      transport: Transport.RMQ,
+      options: {
+        urls: [envs.rabbitUrl],
+        queue: 'riff_queue',
+        queueOptions: { durable: true },
+      },
+    });
+  }
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
@@ -79,6 +95,15 @@ export class createPostService implements OnModuleInit {
     }
 
     const post = await this.postModel.create(normalized);
+
+    // Emit notification event (Notifications-MS resolves followers via ECST)
+    this.client.emit('post.created', {
+      type: 'new_post',
+      message: `New post: ${normalized.title}`,
+      userId: normalized.sql_user_id,
+      postId: String(post._id),
+    });
+
     this.logger.log(`Post created: ${String(post._id)}`);
     return post;
   }

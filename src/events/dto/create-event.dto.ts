@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsDateString,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsDateString, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
@@ -25,8 +19,4 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   location!: string;
-
-  @IsArray()
-  @IsOptional()
-  followers!: string[];
 }
