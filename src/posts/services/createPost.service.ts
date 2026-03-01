@@ -25,7 +25,7 @@ export class createPostService implements OnModuleInit {
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly uploadService: UploadService,
     private readonly storageService: StorageService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');

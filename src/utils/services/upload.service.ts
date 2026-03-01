@@ -17,7 +17,9 @@ export class UploadService {
   validateProviderLink(provider?: string, content?: string) {
     if (!provider) return true;
     if (!content)
-      throw new BadRequestException('Provider specified but content is missing');
+      throw new BadRequestException(
+        'Provider specified but content is missing',
+      );
 
     switch ((provider || '').toLowerCase()) {
       case 'soundcloud':
