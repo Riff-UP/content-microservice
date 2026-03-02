@@ -1,4 +1,32 @@
 services:
+  content-ms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: riff_content_ms
+    restart: always
+    ports:
+      - ${PORT:-3004}:${PORT:-3004}
+      - ${TCP_PORT:-3005}:${TCP_PORT:-3005}
+    environment:
+      - PORT=${PORT:-3002}
+      - TCP_PORT=${TCP_PORT:-3003}
+      - CONTENT_MS_HOST=0.0.0.0
+      - MONGO_URI=mongodb://${DB_USER}:${DB_PASSWORD}@content-db:27017/${DB_NAME}?authSource=admin
+      - RABBIT_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@content-rabbit:5672
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_ACCESS_KEY=${R2_ACCESS_KEY}
+      - R2_SECRET_KEY=${R2_SECRET_KEY}
+      - R2_BUCKET=${R2_BUCKET}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+    depends_on:
+      content-db:
+        condition: service_healthy
+      content-rabbit:
+        condition: service_healthy
+    networks:
+      - riff-network
+
   content-db:
     image: mongo:6.0
     container_name: riff_content
@@ -6,33 +34,43 @@ services:
     volumes:
       - mongo_data:/data/db
     ports:
-      - ${DB_PORT}:27017
+      - ${DB_PORT:-27018}:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
       - MONGO_INITDB_DATABASE=${DB_NAME}
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.adminCommand({ ping: 1 })']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - content-network
+      - riff-network
 
   content-rabbit:
     image: rabbitmq:3.12-management-alpine
     container_name: riff_content_rabbit
     restart: always
     ports:
-      - ${RABBITMQ_PORT:-5672}:5672
-      - ${RABBITMQ_MANAGEMENT_PORT:-15672}:15672
+      - ${RABBITMQ_PORT:-5673}:5672
+      - ${RABBITMQ_MANAGEMENT_PORT:-15673}:15672
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbit_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - content-network
+      - riff-network
 
 volumes:
   mongo_data:
   rabbit_data:
 
 networks:
-  content-network:
-    driver: bridge
+  riff-network:
+    external: true
