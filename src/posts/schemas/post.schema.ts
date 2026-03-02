@@ -21,6 +21,9 @@ export class Post {
 
   @Prop()
   description?: string;
+
+  @Prop({ index: true })
+  deleted_at?: Date;
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
 // index created_at for fast recent queries

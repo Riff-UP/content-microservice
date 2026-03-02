@@ -101,6 +101,11 @@ export class createPostService implements OnModuleInit {
       postId: String(post._id),
     });
 
+    // Emit event to promote user to ARTIST role 
+    this.client.emit('user.publishedContent', {
+      userId: normalized.sql_user_id,
+    });
+
     this.logger.log(`Post created: ${String(post._id)}`);
     return post;
   }

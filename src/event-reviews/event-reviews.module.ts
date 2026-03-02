@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { EventReview, EventReviewSchema } from './schemas/event-reviews.schema';
 import { UsersModule } from '../users/users.module';
 import { CreateEventReviewService } from './services/createEventReview.service';
+import { FindAllEventReviewsService } from './services/findAllEventReviews.service';
 import { FindReviewsByEventService } from './services/findReviewsByEvent.service';
 import { FindOneEventReviewService } from './services/findOneEventReview.service';
 import { UpdateEventReviewService } from './services/updateEventReview.service';
@@ -14,6 +15,7 @@ import { RemoveEventReviewService } from './services/removeEventReview.service';
   controllers: [EventReviewsController, EventReviewsConsumerController],
   providers: [
     CreateEventReviewService,
+    FindAllEventReviewsService,
     FindReviewsByEventService,
     FindOneEventReviewService,
     UpdateEventReviewService,

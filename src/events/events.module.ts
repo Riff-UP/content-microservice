@@ -9,6 +9,7 @@ import { FindAllEventsService } from './services/findAllEvents.service';
 import { FindOneEventService } from './services/findOneEvent.service';
 import { UpdateEventService } from './services/updateEvent.service';
 import { RemoveEventService } from './services/removeEvent.service';
+import { CancelEventsByUserService } from './services/cancelEventsByUser.service';
 
 @Module({
   controllers: [EventsController, EventsConsumerController],
@@ -18,6 +19,7 @@ import { RemoveEventService } from './services/removeEvent.service';
     FindOneEventService,
     UpdateEventService,
     RemoveEventService,
+    CancelEventsByUserService,
   ],
   imports: [
     MongooseModule.forFeature([{ name: Event.name, schema: EventSchema }]),

@@ -1,6 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { CreateEventService } from './services/createEvent.service';
+import { CancelEventsByUserService } from './services/cancelEventsByUser.service';
 import { UsersService } from '../users/users.service';
 import { AuthTokenGeneratedDto } from '../posts/dto/generatedToken.dto';
 
@@ -10,6 +11,7 @@ export class EventsConsumerController {
 
   constructor(
     private readonly createEventService: CreateEventService,
+    private readonly cancelEventsByUserService: CancelEventsByUserService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -23,6 +25,17 @@ export class EventsConsumerController {
       );
     } catch (err) {
       this.logger.error('Failed to upsert user ref', err);
+    }
+  }
+
+  @EventPattern('user.deactivated')
+  async handleUserDeactivated(@Payload() data: { userId: string }) {
+    this.logger.log(`user.deactivated received for user ${data.userId}`);
+    try {
+      const count = await this.cancelEventsByUserService.execute(data.userId);
+      this.logger.log(`Cancelled ${count} events for deactivated user ${data.userId}`);
+    } catch (err) {
+      this.logger.error('Failed to cancel events for user', err);
     }
   }
 }

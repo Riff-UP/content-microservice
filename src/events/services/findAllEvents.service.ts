@@ -25,12 +25,12 @@ export class FindAllEventsService {
 
     const [data, total] = await Promise.all([
       this.eventModel
-        .find()
+        .find({ cancelled_at: { $exists: false } })
         .sort({ created_at: -1 })
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.eventModel.countDocuments().exec(),
+      this.eventModel.countDocuments({ cancelled_at: { $exists: false } }).exec(),
     ]);
 
     this.logger.log(

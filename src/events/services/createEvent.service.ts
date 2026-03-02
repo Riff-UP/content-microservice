@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -11,7 +11,7 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { envs } from '../../config/envs';
 
 @Injectable()
-export class CreateEventService {
+export class CreateEventService implements OnModuleInit{
   private readonly logger = new Logger(CreateEventService.name);
   private readonly client: ClientProxy;
 
@@ -28,7 +28,10 @@ export class CreateEventService {
       },
     });
   }
-
+  async onModuleInit() {
+    await this.client.connect();
+    this.logger.log('RabbitMQ client connected');
+  }
   /**
    * Create an event and emit a notification to followers via RMQ.
    */
@@ -40,6 +43,11 @@ export class CreateEventService {
       message: `New event: ${event.title}`,
       userId: event.sql_user_id,
       eventId: String(event._id),
+    });
+
+    // Emit event to promote user to ARTIST role (users-ms listens)
+    this.client.emit('user.publishedContent', {
+      userId: event.sql_user_id,
     });
 
     this.logger.log(`Event created and emitted: ${String(event._id)}`);

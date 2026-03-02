@@ -19,6 +19,9 @@ export class Event {
 
   @Prop({ required: true })
   location!: string;
+
+  @Prop({ index: true })
+  cancelled_at?: Date;
 }
 export const EventSchema = SchemaFactory.createForClass(Event);
 
