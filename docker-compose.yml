@@ -22,8 +22,6 @@ services:
     depends_on:
       content-db:
         condition: service_healthy
-      content-rabbit:
-        condition: service_healthy
     networks:
       - riff-network
 
@@ -47,29 +45,8 @@ services:
     networks:
       - riff-network
 
-  content-rabbit:
-    image: rabbitmq:3.12-management-alpine
-    container_name: riff_content_rabbit
-    restart: always
-    ports:
-      - ${RABBITMQ_PORT:-5673}:5672
-      - ${RABBITMQ_MANAGEMENT_PORT:-15673}:15672
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
-    volumes:
-      - rabbit_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - riff-network
-
 volumes:
   mongo_data:
-  rabbit_data:
 
 networks:
   riff-network:
