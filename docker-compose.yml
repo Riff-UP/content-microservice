@@ -1,4 +1,4 @@
-services:
+git mservices:
   content-db:
     image: mongo:6.0
     container_name: riff_content
