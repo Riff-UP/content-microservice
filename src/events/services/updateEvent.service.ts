@@ -41,7 +41,7 @@ export class UpdateEventService {
     }
 
     const updated = await this.eventModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
 
     this.client.emit('event.updated', {

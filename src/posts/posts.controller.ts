@@ -22,22 +22,30 @@ export class PostsController {
     private readonly updatePostService: UpdatePostService,
     private readonly removePostService: RemovePostService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   @MessagePattern('createPost')
   async create(@Payload() createPostDto: CreatePostDto) {
-    // Look up user replica (Event-Carried State Transfer)
-    const userRef: UserRefDocument | null = await this.usersService.get(
+    // Look up user replica (Event-Carried State Transfer).
+    // It's possible auth.tokenGenerated hasn't been processed yet by this service
+    // due to async event delivery. Try a short poll before failing.
+    let userRef: UserRefDocument | null = await this.usersService.get(
       createPostDto.sql_user_id,
     );
     if (!userRef) {
+      const maxAttempts = 5;
+      const delayMs = 200;
+      for (let i = 0; i < maxAttempts && !userRef; i++) {
+        await new Promise((res) => setTimeout(res, delayMs));
+        userRef = await this.usersService.get(createPostDto.sql_user_id);
+      }
+    }
+
+    if (!userRef) {
       this.logger.error(
-        `No user ref found for ${createPostDto.sql_user_id}. ` +
-          'Ensure auth.tokenGenerated was received.',
+        `No user ref found for ${createPostDto.sql_user_id}. Ensure auth.tokenGenerated was received.`,
       );
-      RpcExceptionHelper.unauthorized(
-        'User not replicated yet. Authenticate first.',
-      );
+      RpcExceptionHelper.unauthorized('User not replicated yet. Authenticate first.');
       return; // unreachable — RpcExceptionHelper throws, but helps TS narrowing
     }
 

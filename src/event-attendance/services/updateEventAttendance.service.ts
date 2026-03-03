@@ -26,7 +26,7 @@ export class UpdateEventAttendanceService {
     dto: UpdateEventAttendanceDto,
   ): Promise<EventAttendanceDocument> {
     const updated = await this.attendanceModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
 
     if (!updated) {

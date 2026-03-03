@@ -5,6 +5,37 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
 import { GlobalRpcExceptionFilter, RpcResponseInterceptor } from './common';
 
+// Ensure a global `fetch` is available in Node environments that lack it.
+// `undici` is included as a dependency in package.json and provides a
+// Fetch-compatible implementation. We only polyfill when `globalThis.fetch`
+// is not already defined (e.g., Node < 18).
+try {
+  if (!globalThis.fetch) {
+    // Import undici's fetch and related globals lazily so this file still
+    // works in environments where dynamic import isn't desired during tests.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const undici = require('undici');
+    // Assign to globalThis with minimal type assertions.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).fetch = undici.fetch;
+    // Provide basic globals used by some libs (optional).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).Headers = undici.Headers;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).Request = undici.Request;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).Response = undici.Response;
+  }
+} catch (err) {
+  // If polyfill fails, log and continue; runtime will surface errors when
+  // attempting to use fetch. Avoid throwing here to keep bootstrap resilient.
+  // eslint-disable-next-line no-console
+  console.warn(
+    'Could not polyfill global fetch with undici:',
+    err?.message ?? err,
+  );
+}
+
 async function bootstrap() {
   const logger = new Logger('Content-MS');
 

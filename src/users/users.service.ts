@@ -40,7 +40,7 @@ export class UsersService {
     const updated = await this.userRefModel.findOneAndUpdate(
       { user_id: userId },
       { $set: data },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: 'after' },
     );
 
     this.logger.log(`User ref upserted: ${userId}`);

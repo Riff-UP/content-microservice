@@ -22,7 +22,7 @@ export class UpdatePostService {
     updatePostDto: UpdatePostDto,
   ): Promise<PostDocument> {
     const post = await this.postModel
-      .findByIdAndUpdate(id, updatePostDto, { new: true })
+      .findByIdAndUpdate(id, updatePostDto, { returnDocument: 'after' })
       .exec();
 
     if (!post) {

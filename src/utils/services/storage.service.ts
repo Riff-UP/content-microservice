@@ -28,6 +28,7 @@ export class StorageService {
     this.publicUrl = envs.r2.publicUrl;
   }
 
+
   /**
    * Upload a buffer to R2 and return the public URL.
    */
@@ -76,6 +77,29 @@ export class StorageService {
   extractKey(url: string): string {
     if (!url || !url.startsWith(this.publicUrl)) return '';
     return url.replace(`${this.publicUrl}/`, '');
+  }
+
+  /**
+   * Return true if the provided public URL belongs to this R2 publicUrl base.
+   */
+  isOwnPublicUrl(url: string): boolean {
+    return !!this.extractKey(url);
+  }
+
+  /**
+   * Perform a HEAD request against a public URL to validate accessibility and headers.
+   * Throws on non-OK responses.
+   */
+  async validatePublicUrl(url: string): Promise<{ contentType: string; contentLength?: number }> {
+    const key = this.extractKey(url);
+    if (!key) throw new Error('URL does not belong to configured publicUrl');
+
+    const res = await fetch(url, { method: 'HEAD' });
+    if (!res.ok) throw new Error(`HEAD check failed: ${res.status}`);
+    const contentType = res.headers.get('content-type') || '';
+    const cl = res.headers.get('content-length');
+    const contentLength = cl ? parseInt(cl, 10) : undefined;
+    return { contentType, contentLength };
   }
 
   /**

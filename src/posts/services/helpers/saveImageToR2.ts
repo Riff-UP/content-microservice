@@ -1,6 +1,9 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { StorageService } from '../../../utils/services/storage.service';
 import { randomBytes } from 'crypto';
+import { isImageUrl } from './isImageUrl';
+
+const logger = new Logger('saveImageToR2');
 
 /**
  * Fetch an image from a URL (remote or data:base64) and upload it to R2.
@@ -26,26 +29,14 @@ export async function saveImageToR2(
     return storageService.upload(buffer, name, mime);
   }
 
-  // ── Handle remote URLs ──
-  const headers: Record<string, string> = {};
-  if (token) headers['authorization'] = `Bearer ${token}`;
-
-  const res = await fetch(url, { headers });
-
-  if (!res.ok) {
-    throw new BadRequestException(`Failed to fetch image: ${res.status}`);
-  }
-
-  const contentType = res.headers.get('content-type') || '';
-  if (!contentType.startsWith('image/')) {
+  // ── Remote URLs are not accepted anymore ──
+  // The frontend should either submit a `data:` URL (base64) or upload the file
+  // directly to storage (presigned PUT) and provide the resulting public URL.
+  if (url.startsWith('http://') || url.startsWith('https://')) {
     throw new BadRequestException(
-      'Remote URL did not return an image content-type',
+      'Remote URLs are not accepted. Upload the file to storage and provide the public URL, or submit a data URL (data:image/...)',
     );
   }
 
-  const arrayBuffer = await res.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const name = `${Date.now()}-${randomBytes(6).toString('hex')}.img`;
-
-  return storageService.upload(buffer, name, contentType);
+  throw new BadRequestException('Unsupported URL format');
 }

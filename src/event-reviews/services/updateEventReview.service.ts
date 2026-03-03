@@ -26,7 +26,7 @@ export class UpdateEventReviewService {
     dto: UpdateEventReviewDto,
   ): Promise<EventReviewDocument> {
     const updated = await this.eventReviewModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
 
     if (!updated) {

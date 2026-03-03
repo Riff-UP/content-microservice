@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PostsController } from './posts.controller';
 import { postsConsumerController } from './posts.consumer.controller';
+// Uploads logic removed per request
 import { createPostService } from './services/createPost.service';
 import { FindAllPostsService } from './services/findAllPosts.service';
 import { FindOnePostService } from './services/findOnePost.service';
@@ -13,7 +14,10 @@ import { Post, PostSchema } from './schemas/post.schema';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  controllers: [PostsController, postsConsumerController],
+  controllers: [
+    PostsController,
+    postsConsumerController,
+  ],
   providers: [
     createPostService,
     FindAllPostsService,
@@ -28,4 +32,4 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
 })
-export class PostsModule {}
+export class PostsModule { }
