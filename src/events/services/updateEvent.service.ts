@@ -1,34 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  ClientProxy,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
+import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
-import { envs } from '../../config/envs';
+
 
 @Injectable()
 export class UpdateEventService {
   private readonly logger = new Logger(UpdateEventService.name);
-  private readonly client: ClientProxy;
+
 
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
-  ) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.RMQ,
-      options: {
-        urls: [envs.rabbitUrl],
-        queue: 'riff_queue',
-        queueOptions: { durable: true },
-      },
-    });
-  }
+    private readonly publisher: PublisherService,
+  ) { }
 
   /**
    * Update an event and emit a notification to followers via RMQ.
@@ -44,7 +32,7 @@ export class UpdateEventService {
       .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
 
-    this.client.emit('event.updated', {
+    await this.publisher.publish('event.updated', {
       type: 'event_update',
       message: `Event updated: ${updated!.title}`,
       userId: updated!.sql_user_id,

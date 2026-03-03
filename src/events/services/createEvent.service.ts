@@ -1,36 +1,23 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  ClientProxy,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
+import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { CreateEventDto } from '../dto/create-event.dto';
-import { envs } from '../../config/envs';
+
 
 @Injectable()
-export class CreateEventService implements OnModuleInit{
+export class CreateEventService implements OnModuleInit {
   private readonly logger = new Logger(CreateEventService.name);
-  private readonly client: ClientProxy;
+
 
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
-  ) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.RMQ,
-      options: {
-        urls: [envs.rabbitUrl],
-        queue: 'riff_queue',
-        queueOptions: { durable: true },
-      },
-    });
-  }
+    private readonly publisher: PublisherService,
+  ) { }
   async onModuleInit() {
-    await this.client.connect();
-    this.logger.log('RabbitMQ client connected');
+    this.logger.log('CreateEventService initialized');
   }
   /**
    * Create an event and emit a notification to followers via RMQ.
@@ -38,15 +25,15 @@ export class CreateEventService implements OnModuleInit{
   async execute(dto: CreateEventDto): Promise<EventDocument> {
     const event = await this.eventModel.create(dto);
 
-    this.client.emit('event.created', {
+    await this.publisher.publish('event.created', {
       type: 'new_event',
       message: `New event: ${event.title}`,
       userId: event.sql_user_id,
       eventId: String(event._id),
     });
 
-    // Emit event to promote user to ARTIST role (users-ms listens)
-    this.client.emit('user.publishedContent', {
+    // Publish event to promote user to ARTIST role (users-ms listens)
+    await this.publisher.publish('user.publishedContent', {
       userId: event.sql_user_id,
     });
 

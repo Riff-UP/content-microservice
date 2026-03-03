@@ -8,6 +8,7 @@ import { SavedPostsModule } from './saved-posts/saved-posts.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { envs } from './config/envs';
+import { PublisherService } from './common/publisher.service';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { envs } from './config/envs';
     SavedPostsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [PublisherService],
 })
-export class AppModule {}
+export class AppModule { }
