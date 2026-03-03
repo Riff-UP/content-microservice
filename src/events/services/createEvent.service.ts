@@ -38,6 +38,10 @@ export class CreateEventService implements OnModuleInit{
   async execute(dto: CreateEventDto): Promise<EventDocument> {
     const event = await this.eventModel.create(dto);
 
+    if(!event.sql_user_id){
+      this.logger.warn(`Event ${event._id} created without sql_user_id skipping promotion`);
+    }
+
     this.client.emit('event.created', {
       type: 'new_event',
       message: `New event: ${event.title}`,

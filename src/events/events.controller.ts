@@ -25,8 +25,9 @@ export class EventsController {
   }
 
   @MessagePattern('findAllEvents')
-  findAll(@Payload() pagination: PaginationDto) {
-    return this.findAllEventsService.execute(pagination);
+  findAll(@Payload() payload: PaginationDto & { userId?: string }) {
+    const { userId, ...pagination } = payload;
+    return this.findAllEventsService.execute(pagination, userId);
   }
 
   @MessagePattern('findOneEvent')

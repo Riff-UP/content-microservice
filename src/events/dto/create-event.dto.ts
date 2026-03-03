@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 export class CreateEventDto {
   @IsString()
@@ -24,4 +25,10 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   location!: string;
+}
+
+export class EventPaginationDto extends PaginationDto {
+  @IsOptional()
+  @IsString()
+  userId?: string;
 }
