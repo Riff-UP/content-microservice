@@ -5,17 +5,15 @@ import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
 
-
 @Injectable()
 export class RemoveEventService {
   private readonly logger = new Logger(RemoveEventService.name);
-
 
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly publisher: PublisherService,
-  ) { }
+  ) {}
 
   /**
    * Delete an event and emit a cancellation notification via RMQ.

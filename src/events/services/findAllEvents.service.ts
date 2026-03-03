@@ -30,7 +30,9 @@ export class FindAllEventsService {
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.eventModel.countDocuments({ cancelled_at: { $exists: false } }).exec(),
+      this.eventModel
+        .countDocuments({ cancelled_at: { $exists: false } })
+        .exec(),
     ]);
 
     this.logger.log(

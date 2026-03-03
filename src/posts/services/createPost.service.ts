@@ -20,13 +20,12 @@ import { RpcExceptionHelper } from '../../common';
 export class createPostService implements OnModuleInit {
   private readonly logger = new Logger('PostCreationService');
 
-
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly uploadService: UploadService,
     private readonly storageService: StorageService,
     private readonly publisher: PublisherService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
@@ -50,7 +49,8 @@ export class createPostService implements OnModuleInit {
     // Accept SoundCloud links either when the client sets provider:'soundcloud'
     // or when the post is `type: 'audio'` and the content URL contains soundcloud.com.
     if (
-      (normalized.provider && normalized.provider.toLowerCase() === 'soundcloud') ||
+      (normalized.provider &&
+        normalized.provider.toLowerCase() === 'soundcloud') ||
       (normalized.type === 'audio' && /soundcloud\.com/.test(contentUrl))
     ) {
       if (!normalized.provider) normalized.provider = 'soundcloud';
@@ -84,7 +84,10 @@ export class createPostService implements OnModuleInit {
           this.storageService,
         );
         normalized.content = publicUrl;
-      } else if (contentUrl.startsWith('http://') || contentUrl.startsWith('https://')) {
+      } else if (
+        contentUrl.startsWith('http://') ||
+        contentUrl.startsWith('https://')
+      ) {
         // accept only if the URL belongs to our configured publicUrl (already uploaded to R2)
         if (!this.storageService.isOwnPublicUrl(contentUrl)) {
           RpcExceptionHelper.badRequest(
@@ -94,13 +97,18 @@ export class createPostService implements OnModuleInit {
 
         // Validate the uploaded object (HEAD) to ensure it's an image and accessible
         try {
-          const { contentType } = await this.storageService.validatePublicUrl(contentUrl);
+          const { contentType } =
+            await this.storageService.validatePublicUrl(contentUrl);
           if (!contentType.startsWith('image/')) {
             RpcExceptionHelper.badRequest('Uploaded object is not an image');
           }
         } catch (err) {
-          this.logger.warn(`Validation failed for uploaded publicUrl: ${err?.message ?? err}`);
-          RpcExceptionHelper.badRequest('Uploaded object is not accessible or invalid');
+          this.logger.warn(
+            `Validation failed for uploaded publicUrl: ${err?.message ?? err}`,
+          );
+          RpcExceptionHelper.badRequest(
+            'Uploaded object is not accessible or invalid',
+          );
         }
       } else {
         RpcExceptionHelper.badRequest('Unsupported image content format');

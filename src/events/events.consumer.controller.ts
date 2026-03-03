@@ -19,10 +19,8 @@ export class EventsConsumerController {
   async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
     this.logger.log('auth.tokenGenerated received');
     try {
-      await this.usersService.upsert(data.user, data.token);
-      this.logger.log(
-        `User ref upserted: ${data.user?.id || data.user?.user_id}`,
-      );
+      await this.usersService.upsert(data);
+      this.logger.log(`User ref upserted: ${data.userId}`);
     } catch (err) {
       this.logger.error('Failed to upsert user ref', err);
     }
@@ -33,7 +31,9 @@ export class EventsConsumerController {
     this.logger.log(`user.deactivated received for user ${data.userId}`);
     try {
       const count = await this.cancelEventsByUserService.execute(data.userId);
-      this.logger.log(`Cancelled ${count} events for deactivated user ${data.userId}`);
+      this.logger.log(
+        `Cancelled ${count} events for deactivated user ${data.userId}`,
+      );
     } catch (err) {
       this.logger.error('Failed to cancel events for user', err);
     }

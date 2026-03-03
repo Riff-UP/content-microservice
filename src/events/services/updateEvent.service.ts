@@ -6,17 +6,15 @@ import { Event, EventDocument } from '../schemas/event.schema';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
 
-
 @Injectable()
 export class UpdateEventService {
   private readonly logger = new Logger(UpdateEventService.name);
-
 
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly publisher: PublisherService,
-  ) { }
+  ) {}
 
   /**
    * Update an event and emit a notification to followers via RMQ.

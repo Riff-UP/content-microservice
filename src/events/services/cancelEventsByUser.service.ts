@@ -21,7 +21,9 @@ export class CancelEventsByUserService {
       { $set: { cancelled_at: new Date() } },
     );
 
-    this.logger.log(`Cancelled ${result.modifiedCount} events for user ${userId}`);
+    this.logger.log(
+      `Cancelled ${result.modifiedCount} events for user ${userId}`,
+    );
     return result.modifiedCount;
   }
 }

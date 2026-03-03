@@ -17,9 +17,5 @@ export async function isImageUrl(u: string): Promise<boolean> {
     // not a valid URL or no extension
   }
 
-
-
-
-
   return false;
 }

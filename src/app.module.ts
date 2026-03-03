@@ -8,7 +8,7 @@ import { SavedPostsModule } from './saved-posts/saved-posts.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { envs } from './config/envs';
-import { PublisherService } from './common/publisher.service';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -17,6 +17,7 @@ import { PublisherService } from './common/publisher.service';
       envFilePath: '.env',
     }),
     MongooseModule.forRoot(envs.mongoUri),
+    CommonModule,
     PostsModule,
     EventsModule,
     EventAttendanceModule,
@@ -25,6 +26,6 @@ import { PublisherService } from './common/publisher.service';
     SavedPostsModule,
   ],
   controllers: [],
-  providers: [PublisherService],
+  providers: [],
 })
-export class AppModule { }
+export class AppModule {}

@@ -15,10 +15,7 @@ import { Post, PostSchema } from './schemas/post.schema';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  controllers: [
-    PostsController,
-    postsConsumerController,
-  ],
+  controllers: [PostsController, postsConsumerController],
   providers: [
     createPostService,
     FindAllPostsService,
@@ -34,4 +31,4 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
 })
-export class PostsModule { }
+export class PostsModule {}

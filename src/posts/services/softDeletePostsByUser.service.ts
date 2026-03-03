@@ -21,7 +21,9 @@ export class SoftDeletePostsByUserService {
       { $set: { deleted_at: new Date() } },
     );
 
-    this.logger.log(`Soft deleted ${result.modifiedCount} posts for user ${userId}`);
+    this.logger.log(
+      `Soft deleted ${result.modifiedCount} posts for user ${userId}`,
+    );
     return result.modifiedCount;
   }
 }

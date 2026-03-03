@@ -5,17 +5,15 @@ import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { CreateEventDto } from '../dto/create-event.dto';
 
-
 @Injectable()
 export class CreateEventService implements OnModuleInit {
   private readonly logger = new Logger(CreateEventService.name);
-
 
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly publisher: PublisherService,
-  ) { }
+  ) {}
   async onModuleInit() {
     this.logger.log('CreateEventService initialized');
   }

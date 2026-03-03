@@ -17,10 +17,8 @@ export class PostReactionsConsumerController {
   async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
     this.logger.log('auth.tokenGenerated received');
     try {
-      await this.usersService.upsert(data.user, data.token);
-      this.logger.log(
-        `User ref upserted: ${data.user?.id || data.user?.user_id}`,
-      );
+      await this.usersService.upsert(data);
+      this.logger.log(`User ref upserted: ${data.userId}`);
     } catch (err) {
       this.logger.error('Failed to upsert user ref', err);
     }

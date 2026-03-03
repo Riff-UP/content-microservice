@@ -22,7 +22,7 @@ export class PostsController {
     private readonly updatePostService: UpdatePostService,
     private readonly removePostService: RemovePostService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @MessagePattern('createPost')
   async create(@Payload() createPostDto: CreatePostDto) {
@@ -45,7 +45,9 @@ export class PostsController {
       this.logger.error(
         `No user ref found for ${createPostDto.sql_user_id}. Ensure auth.tokenGenerated was received.`,
       );
-      RpcExceptionHelper.unauthorized('User not replicated yet. Authenticate first.');
+      RpcExceptionHelper.unauthorized(
+        'User not replicated yet. Authenticate first.',
+      );
       return; // unreachable — RpcExceptionHelper throws, but helps TS narrowing
     }
 
