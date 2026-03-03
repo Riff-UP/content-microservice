@@ -24,12 +24,12 @@ export class FindAllPostsService {
 
     const [data, total] = await Promise.all([
       this.postModel
-        .find()
+        .find({ deleted_at: { $exists: false } })
         .sort({ created_at: -1 })
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.postModel.countDocuments().exec(),
+      this.postModel.countDocuments({ deleted_at: { $exists: false } }).exec(),
     ]);
 
     this.logger.log(
@@ -51,7 +51,7 @@ export class FindAllPostsService {
    */
   async byUser(sqlUserId: string): Promise<PostDocument[]> {
     return this.postModel
-      .find({ sql_user_id: sqlUserId })
+      .find({ sql_user_id: sqlUserId, deleted_at: { $exists: false } })
       .sort({ created_at: -1 })
       .exec();
   }

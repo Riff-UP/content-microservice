@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateEventReviewDto } from './dto/create-event-review.dto';
 import { UpdateEventReviewDto } from './dto/update-event-review.dto';
 import { CreateEventReviewService } from './services/createEventReview.service';
+import { FindAllEventReviewsService } from './services/findAllEventReviews.service';
 import { FindReviewsByEventService } from './services/findReviewsByEvent.service';
 import { FindOneEventReviewService } from './services/findOneEventReview.service';
 import { UpdateEventReviewService } from './services/updateEventReview.service';
@@ -12,6 +13,7 @@ import { RemoveEventReviewService } from './services/removeEventReview.service';
 export class EventReviewsController {
   constructor(
     private readonly createEventReviewService: CreateEventReviewService,
+    private readonly findAllEventReviewsService: FindAllEventReviewsService,
     private readonly findReviewsByEventService: FindReviewsByEventService,
     private readonly findOneEventReviewService: FindOneEventReviewService,
     private readonly updateEventReviewService: UpdateEventReviewService,
@@ -21,6 +23,11 @@ export class EventReviewsController {
   @MessagePattern('createEventReview')
   create(@Payload() dto: CreateEventReviewDto) {
     return this.createEventReviewService.execute(dto);
+  }
+
+  @MessagePattern('findAllEventReviews')
+  findAll() {
+    return this.findAllEventReviewsService.execute();
   }
 
   @MessagePattern('findReviewsByEvent')
