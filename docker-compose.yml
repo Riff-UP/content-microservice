@@ -12,7 +12,7 @@ services:
       - PORT=${PORT:-3002}
       - TCP_PORT=${TCP_PORT:-3003}
       - CONTENT_MS_HOST=0.0.0.0
-      - MONGO_URI=mongodb://${DB_USER}:${DB_PASSWORD}@content-db:27017/${DB_NAME}?authSource=admin
+      - MONGO_URI=mongodb://${DB_USER}:${DB_PASSWORD}@content-db:27017/${DB_NAME}?authSource=admin&tls=false
       - RABBIT_URL=amqp://guest:guest@central-rabbit:5672
       - R2_ENDPOINT=${R2_ENDPOINT}
       - R2_ACCESS_KEY=${R2_ACCESS_KEY}
