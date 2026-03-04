@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PostsController } from './posts.controller';
 import { postsConsumerController } from './posts.consumer.controller';
-// Uploads logic removed per request
 import { createPostService } from './services/createPost.service';
 import { FindAllPostsService } from './services/findAllPosts.service';
 import { FindOnePostService } from './services/findOnePost.service';
 import { UpdatePostService } from './services/updatePost.service';
 import { RemovePostService } from './services/removePost.service';
 import { SoftDeletePostsByUserService } from './services/softDeletePostsByUser.service';
-import { UploadService } from '../utils/services/upload.service';
-import { StorageService } from '../utils/services/storage.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/post.schema';
 import { UsersModule } from '../users/users.module';
@@ -23,8 +20,6 @@ import { UsersModule } from '../users/users.module';
     UpdatePostService,
     RemovePostService,
     SoftDeletePostsByUserService,
-    UploadService,
-    StorageService,
   ],
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),

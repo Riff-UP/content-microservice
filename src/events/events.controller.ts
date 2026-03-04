@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -11,6 +11,8 @@ import { PaginationDto } from '../common';
 
 @Controller()
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
+
   constructor(
     private readonly createEventService: CreateEventService,
     private readonly findAllEventsService: FindAllEventsService,

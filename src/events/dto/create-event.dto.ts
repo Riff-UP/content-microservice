@@ -24,4 +24,8 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   location!: string;
+
+  @IsString()
+  @IsOptional()
+  coverImageUrl?: string;
 }

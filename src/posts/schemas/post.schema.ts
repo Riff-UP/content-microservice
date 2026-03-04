@@ -19,6 +19,11 @@ export class Post {
   @Prop()
   provider?: string;
 
+  @Prop({ type: Object })
+  provider_meta?: {
+    provider_url?: string;
+  };
+
   @Prop()
   description?: string;
 

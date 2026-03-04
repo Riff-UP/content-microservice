@@ -14,7 +14,6 @@ export class CreatePostDto {
   title!: string;
 
   @IsOptional()
-  @IsUrl()
   @IsString()
   content?: string;
 
@@ -25,4 +24,9 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   provider?: string;
+
+  @IsOptional()
+  provider_meta?: {
+    provider_url?: string;
+  };
 }

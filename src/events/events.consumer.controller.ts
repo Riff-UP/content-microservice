@@ -16,11 +16,26 @@ export class EventsConsumerController {
   ) {}
 
   @EventPattern('auth.tokenGenerated')
-  async handleAuthToken(@Payload() data: AuthTokenGeneratedDto) {
-    this.logger.log('auth.tokenGenerated received');
+  async handleAuthToken(@Payload() data: any) {
+    this.logger.log('auth.tokenGenerated received', JSON.stringify(data));
+
     try {
-      await this.usersService.upsert(data);
-      this.logger.log(`User ref upserted: ${data.userId}`);
+      // Normalizar estructura: el gateway puede enviar { user: { id }, token } o { userId, token }
+      const normalized = {
+        userId: data.userId || data.user?.id,
+        token: data.token,
+        email: data.email || data.user?.email || 'unknown@event.local',
+        name: data.name || data.user?.name || 'Event User',
+        role: data.role || data.user?.role || 'user',
+      };
+
+      if (!normalized.userId) {
+        this.logger.error('Invalid auth.tokenGenerated payload: missing userId', data);
+        return;
+      }
+
+      await this.usersService.upsert(normalized);
+      this.logger.log(`User ref upserted: ${normalized.userId}`);
     } catch (err) {
       this.logger.error('Failed to upsert user ref', err);
     }

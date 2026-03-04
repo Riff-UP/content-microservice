@@ -20,6 +20,9 @@ export class Event {
   @Prop({ required: true })
   location!: string;
 
+  @Prop()
+  coverImageUrl?: string;
+
   @Prop({ index: true })
   cancelled_at?: Date;
 }
