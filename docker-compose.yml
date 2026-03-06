@@ -1,0 +1,54 @@
+services:
+  content-ms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: riff_content_ms
+    restart: always
+    ports:
+      - ${PORT:-3004}:${PORT:-3004}
+      - ${TCP_PORT:-3005}:${TCP_PORT:-3005}
+    environment:
+      - PORT=${PORT:-3002}
+      - TCP_PORT=${TCP_PORT:-3003}
+      - CONTENT_MS_HOST=0.0.0.0
+      - MONGO_URI=mongodb://${DB_USER}:${DB_PASSWORD}@content-db:27017/${DB_NAME}?authSource=admin&tls=false
+      - RABBIT_URL=amqp://guest:guest@central-rabbit:5672
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_ACCESS_KEY=${R2_ACCESS_KEY}
+      - R2_SECRET_KEY=${R2_SECRET_KEY}
+      - R2_BUCKET=${R2_BUCKET}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+    depends_on:
+      content-db:
+        condition: service_healthy
+    networks:
+      - riff-network
+
+  content-db:
+    image: mongo:6.0
+    container_name: riff_content
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - ${DB_PORT:-27018}:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+    healthcheck:
+      test: ['CMD', 'mongosh', '--username', '${DB_USER}', '--password', '${DB_PASSWORD}', '--authenticationDatabase', 'admin', '--quiet', '--eval', 'db.adminCommand("ping")']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - riff-network
+
+volumes:
+  mongo_data:
+
+networks:
+  riff-network:
+    external: true

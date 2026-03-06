@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  content-ms:
+    # This override augments the `content-ms` service from the main compose file.
+    # It sets NODE_EXTRA_CA_CERTS and mounts a PEM file when present.
+    environment:
+      - NODE_EXTRA_CA_CERTS=/etc/ssl/certs/extra/custom-ca.pem
+    volumes:
+      - ./deploy/certs/custom-ca.pem:/etc/ssl/certs/extra/custom-ca.pem:ro
+    networks:
+      - riff-network
+
+networks:
+  riff-network:
+    external: true

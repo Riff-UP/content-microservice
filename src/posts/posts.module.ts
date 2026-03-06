@@ -1,9 +1,29 @@
 import { Module } from '@nestjs/common';
-import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
+import { postsConsumerController } from './posts.consumer.controller';
+import { createPostService } from './services/createPost.service';
+import { FindAllPostsService } from './services/findAllPosts.service';
+import { FindOnePostService } from './services/findOnePost.service';
+import { UpdatePostService } from './services/updatePost.service';
+import { RemovePostService } from './services/removePost.service';
+import { SoftDeletePostsByUserService } from './services/softDeletePostsByUser.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Post, PostSchema } from './schemas/post.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  controllers: [PostsController],
-  providers: [PostsService],
+  controllers: [PostsController, postsConsumerController],
+  providers: [
+    createPostService,
+    FindAllPostsService,
+    FindOnePostService,
+    UpdatePostService,
+    RemovePostService,
+    SoftDeletePostsByUserService,
+  ],
+  imports: [
+    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+    UsersModule,
+  ],
 })
 export class PostsModule {}

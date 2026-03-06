@@ -1,0 +1,35 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
+
+export type PostDocument = HydratedDocument<Post>;
+
+@Schema({ timestamps: { createdAt: 'created_at', updatedAt: false } })
+export class Post {
+  @Prop({ required: true, index: true })
+  sql_user_id!: string;
+
+  @Prop({ required: true, index: true })
+  type!: string;
+
+  @Prop({ required: true })
+  title!: string;
+  @Prop()
+  content?: string;
+
+  @Prop()
+  provider?: string;
+
+  @Prop({ type: Object })
+  provider_meta?: {
+    provider_url?: string;
+  };
+
+  @Prop()
+  description?: string;
+
+  @Prop({ index: true })
+  deleted_at?: Date;
+}
+export const PostSchema = SchemaFactory.createForClass(Post);
+// index created_at for fast recent queries
+PostSchema.index({ created_at: -1 });

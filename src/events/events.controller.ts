@@ -1,35 +1,74 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { CreateEventService } from './services/createEvent.service';
+import { FindAllEventsService } from './services/findAllEvents.service';
+import { FindOneEventService } from './services/findOneEvent.service';
+import { UpdateEventService } from './services/updateEvent.service';
+import { RemoveEventService } from './services/removeEvent.service';
+import { PaginationDto } from '../common';
 
 @Controller()
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  private readonly logger = new Logger(EventsController.name);
+
+  constructor(
+    private readonly createEventService: CreateEventService,
+    private readonly findAllEventsService: FindAllEventsService,
+    private readonly findOneEventService: FindOneEventService,
+    private readonly updateEventService: UpdateEventService,
+    private readonly removeEventService: RemoveEventService,
+  ) {}
 
   @MessagePattern('createEvent')
-  create(@Payload() createEventDto: CreateEventDto) {
-    return this.eventsService.create(createEventDto);
+  create(@Payload() payload: any) {
+    this.logger.log(`Received createEvent with payload: ${JSON.stringify(payload)}`);
+
+    // Transform userId to sql_user_id if needed
+    const dto: CreateEventDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
+
+    this.logger.log(`🔄 Transformed DTO: ${JSON.stringify(dto)}`);
+    return this.createEventService.execute(dto);
   }
 
   @MessagePattern('findAllEvents')
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(@Payload() pagination: PaginationDto) {
+    return this.findAllEventsService.execute(pagination);
+  }
+
+  @MessagePattern('findEventsByOrganizer')
+  findByOrganizer(@Payload() payload: { organizerId: string }) {
+    // Mapear organizerId (UUID del gateway) a sql_user_id del esquema
+    const sqlUserId = payload.organizerId;
+    this.logger.log(`findEventsByOrganizer - sql_user_id: ${sqlUserId}`);
+    return this.findAllEventsService.byOrganizer(sqlUserId);
   }
 
   @MessagePattern('findOneEvent')
-  findOne(@Payload() id: number) {
-    return this.eventsService.findOne(id);
+  findOne(@Payload() payload: { id: string }) {
+    return this.findOneEventService.execute(payload.id);
   }
 
   @MessagePattern('updateEvent')
-  update(@Payload() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(updateEventDto.id, updateEventDto);
+  update(@Payload() payload: any) {
+    this.logger.log(`📥 Received updateEvent with payload: ${JSON.stringify(payload)}`);
+
+    // Transform userId to sql_user_id if needed
+    const dto: UpdateEventDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
+
+    this.logger.log(`🔄 Transformed DTO: ${JSON.stringify(dto)}`);
+    return this.updateEventService.execute(dto.id, dto);
   }
 
   @MessagePattern('removeEvent')
-  remove(@Payload() id: number) {
-    return this.eventsService.remove(id);
+  remove(@Payload() data: { id: string }) {
+    return this.removeEventService.execute(data.id);
   }
 }

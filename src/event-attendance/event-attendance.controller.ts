@@ -1,35 +1,56 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { EventAttendanceService } from './event-attendance.service';
 import { CreateEventAttendanceDto } from './dto/create-event-attendance.dto';
 import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
+import { CreateEventAttendanceService } from './services/createEventAttendance.service';
+import { FindAttendanceByEventService } from './services/findAttendanceByEvent.service';
+import { FindOneEventAttendanceService } from './services/findOneEventAttendance.service';
+import { UpdateEventAttendanceService } from './services/updateEventAttendance.service';
+import { RemoveEventAttendanceService } from './services/removeEventAttendance.service';
 
 @Controller()
 export class EventAttendanceController {
-  constructor(private readonly eventAttendanceService: EventAttendanceService) {}
+  private readonly logger = new Logger(EventAttendanceController.name);
+
+  constructor(
+    private readonly createEventAttendanceService: CreateEventAttendanceService,
+    private readonly findAttendanceByEventService: FindAttendanceByEventService,
+    private readonly findOneEventAttendanceService: FindOneEventAttendanceService,
+    private readonly updateEventAttendanceService: UpdateEventAttendanceService,
+    private readonly removeEventAttendanceService: RemoveEventAttendanceService,
+  ) {}
 
   @MessagePattern('createEventAttendance')
-  create(@Payload() createEventAttendanceDto: CreateEventAttendanceDto) {
-    return this.eventAttendanceService.create(createEventAttendanceDto);
+  create(@Payload() payload: any) {
+    const dto: CreateEventAttendanceDto = {
+      event_id: payload.event_id || payload.eventId,
+      sql_user_id: payload.sql_user_id || payload.userId,
+      status: payload.status,
+    };
+    return this.createEventAttendanceService.execute(dto);
   }
 
-  @MessagePattern('findAllEventAttendance')
-  findAll() {
-    return this.eventAttendanceService.findAll();
+  @MessagePattern('findAttendanceByEvent')
+  findByEvent(@Payload() payload: { event_id: string }) {
+    return this.findAttendanceByEventService.execute(payload.event_id);
   }
 
   @MessagePattern('findOneEventAttendance')
-  findOne(@Payload() id: number) {
-    return this.eventAttendanceService.findOne(id);
+  findOne(@Payload() payload: { id: string }) {
+    return this.findOneEventAttendanceService.execute(payload.id);
   }
 
   @MessagePattern('updateEventAttendance')
-  update(@Payload() updateEventAttendanceDto: UpdateEventAttendanceDto) {
-    return this.eventAttendanceService.update(updateEventAttendanceDto.id, updateEventAttendanceDto);
+  update(@Payload() payload: any) {
+    const dto: UpdateEventAttendanceDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
+    return this.updateEventAttendanceService.execute(dto.id, dto);
   }
 
   @MessagePattern('removeEventAttendance')
-  remove(@Payload() id: number) {
-    return this.eventAttendanceService.remove(id);
+  remove(@Payload() payload: { id: string }) {
+    return this.removeEventAttendanceService.execute(payload.id);
   }
 }
