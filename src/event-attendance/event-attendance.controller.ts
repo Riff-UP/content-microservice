@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateEventAttendanceDto } from './dto/create-event-attendance.dto';
 import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
@@ -10,6 +10,8 @@ import { RemoveEventAttendanceService } from './services/removeEventAttendance.s
 
 @Controller()
 export class EventAttendanceController {
+  private readonly logger = new Logger(EventAttendanceController.name);
+
   constructor(
     private readonly createEventAttendanceService: CreateEventAttendanceService,
     private readonly findAttendanceByEventService: FindAttendanceByEventService,
@@ -19,7 +21,12 @@ export class EventAttendanceController {
   ) {}
 
   @MessagePattern('createEventAttendance')
-  create(@Payload() dto: CreateEventAttendanceDto) {
+  create(@Payload() payload: any) {
+    const dto: CreateEventAttendanceDto = {
+      event_id: payload.event_id || payload.eventId,
+      sql_user_id: payload.sql_user_id || payload.userId,
+      status: payload.status,
+    };
     return this.createEventAttendanceService.execute(dto);
   }
 
@@ -34,7 +41,11 @@ export class EventAttendanceController {
   }
 
   @MessagePattern('updateEventAttendance')
-  update(@Payload() dto: UpdateEventAttendanceDto) {
+  update(@Payload() payload: any) {
+    const dto: UpdateEventAttendanceDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
     return this.updateEventAttendanceService.execute(dto.id, dto);
   }
 

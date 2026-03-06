@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateEventReviewDto } from './dto/create-event-review.dto';
 import { UpdateEventReviewDto } from './dto/update-event-review.dto';
@@ -11,6 +11,8 @@ import { RemoveEventReviewService } from './services/removeEventReview.service';
 
 @Controller()
 export class EventReviewsController {
+  private readonly logger = new Logger(EventReviewsController.name);
+
   constructor(
     private readonly createEventReviewService: CreateEventReviewService,
     private readonly findAllEventReviewsService: FindAllEventReviewsService,
@@ -21,7 +23,11 @@ export class EventReviewsController {
   ) {}
 
   @MessagePattern('createEventReview')
-  create(@Payload() dto: CreateEventReviewDto) {
+  create(@Payload() payload: any) {
+    const dto: CreateEventReviewDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
     return this.createEventReviewService.execute(dto);
   }
 
@@ -41,7 +47,11 @@ export class EventReviewsController {
   }
 
   @MessagePattern('updateEventReview')
-  update(@Payload() dto: UpdateEventReviewDto) {
+  update(@Payload() payload: any) {
+    const dto: UpdateEventReviewDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
     return this.updateEventReviewService.execute(dto.id, dto);
   }
 

@@ -48,4 +48,19 @@ export class FindAllEventsService {
       },
     };
   }
+
+  /**
+   * Returns all active events for a specific organizer (sql_user_id).
+   */
+  async byOrganizer(sqlUserId: string): Promise<EventDocument[]> {
+    const events = await this.eventModel
+      .find({ sql_user_id: sqlUserId, cancelled_at: { $exists: false } })
+      .sort({ event_date: 1 })
+      .exec();
+
+    this.logger.log(
+      `Found ${events.length} events for organizer ${sqlUserId}`,
+    );
+    return events;
+  }
 }

@@ -32,11 +32,19 @@ export class PublisherService implements OnModuleInit, OnModuleDestroy {
   }
 
   async publish(routingKey: string, payload: unknown) {
-    const content = Buffer.from(JSON.stringify(payload));
+    // NestJS RMQ consumers esperan el envelope { pattern, data }
+    const envelope: { pattern: string; data: unknown } = {
+      pattern: routingKey,
+      data: payload,
+    };
+    const content = Buffer.from(JSON.stringify(envelope));
     try {
       await this.channel.publish(this.exchange, routingKey, content, {
         persistent: true,
       });
+      this.logger.debug(
+        `Published [${routingKey}]: ${JSON.stringify(payload)}`,
+      );
     } catch (err) {
       this.logger.error('Failed to publish message', err);
       throw err;

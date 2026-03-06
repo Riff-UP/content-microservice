@@ -25,7 +25,17 @@ export class PostsController {
   ) {}
 
   @MessagePattern('createPost')
-  async create(@Payload() createPostDto: CreatePostDto) {
+  async create(@Payload() payload: any) {
+    this.logger.log(`📥 Received createPost with payload: ${JSON.stringify(payload)}`);
+
+    // Transform userId to sql_user_id if needed
+    const createPostDto: CreatePostDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
+
+    this.logger.log(`🔄 Transformed DTO with sql_user_id: ${createPostDto.sql_user_id}`);
+
     // Look up user replica (Event-Carried State Transfer).
     // It's possible auth.tokenGenerated hasn't been processed yet by this service
     // due to async event delivery. Try a short poll before failing.
@@ -61,13 +71,30 @@ export class PostsController {
     return this.findAllPostsService.execute(pagination);
   }
 
+  @MessagePattern('findPostsByUser')
+  findByUser(@Payload() payload: { userId: string }) {
+    // Mapear userId (UUID del gateway) a sql_user_id del esquema
+    const sqlUserId = payload.userId;
+    this.logger.log(`findPostsByUser - sql_user_id: ${sqlUserId}`);
+    return this.findAllPostsService.byUser(sqlUserId);
+  }
+
   @MessagePattern('findOnePost')
   findOne(@Payload() id: string) {
     return this.findOnePostService.execute(id);
   }
 
   @MessagePattern('updatePost')
-  update(@Payload() updatePostDto: UpdatePostDto) {
+  update(@Payload() payload: any) {
+    this.logger.log(`📥 Received updatePost with payload: ${JSON.stringify(payload)}`);
+
+    // Transform userId to sql_user_id if needed
+    const updatePostDto: UpdatePostDto = {
+      ...payload,
+      sql_user_id: payload.sql_user_id || payload.userId,
+    };
+
+    this.logger.log(`🔄 Transformed DTO with sql_user_id: ${updatePostDto.sql_user_id}`);
     return this.updatePostService.execute(updatePostDto.id, updatePostDto);
   }
 

@@ -1,32 +1,42 @@
-# Multi-stage Dockerfile for content-ms (Alpine base)
-FROM node:20-alpine AS builder
+# Multi-stage Dockerfile for content-ms
+FROM node:20 AS builder
 
 WORKDIR /app
 
-# Install all deps (including dev deps) to build the project
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copy source and build
 COPY . .
+
+# Forzar compilación completa (sin caché incremental)
+RUN rm -f tsconfig.tsbuildinfo
+
 RUN npm run build
 
-# --- Production stage ---
-FROM node:20-alpine
+# Verificar que dist/main.js existe
+RUN test -f dist/main.js || (echo "ERROR: dist/main.js no generado" && ls -la dist/ && exit 1)
 
-# Install CA certificates so the runtime can validate TLS endpoints (R2, external URLs)
-RUN apk add --no-cache ca-certificates bash && update-ca-certificates
+# Instalar solo prod deps en el mismo entorno (Debian) para compatibilidad de binarios nativos
+RUN npm install --omit=dev
+
+# --- Production stage ---
+FROM node:20-slim
+
+# libvips requerido por sharp en runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libvips \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
 
 WORKDIR /app
 
-# Copy built output and node_modules from builder
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
 
-# App uses HTTP port and a TCP port defined in env (3004 and 3005 by default)
 EXPOSE 3004
 EXPOSE 3005
 
-# Start the compiled Nest app
 CMD ["node", "dist/main"]
+
