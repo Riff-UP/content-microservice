@@ -29,12 +29,12 @@ export class RemoveEventService {
 
     await this.publisher.publish('event.cancelled', {
       type: 'event_cancelled',
-      message: `Event cancelled: ${removed!.title}`,
-      userId: removed!.sql_user_id,
+      message: `Event cancelled: ${removed.title}`,
+      userId: removed.sql_user_id,
       eventId: id,
     });
 
     this.logger.log(`Event removed and cancellation emitted: ${id}`);
-    return removed!;
+    return removed;
   }
 }

@@ -28,6 +28,6 @@ export class RemoveEventReviewService {
     }
 
     this.logger.log(`Review removed: ${id}`);
-    return removed!;
+    return removed;
   }
 }

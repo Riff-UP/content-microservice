@@ -23,6 +23,6 @@ export class FindOneEventService {
       RpcExceptionHelper.notFound('Event', id);
     }
     this.logger.log(`Event found: ${id}`);
-    return event!;
+    return event;
   }
 }

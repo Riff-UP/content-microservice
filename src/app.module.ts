@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { envs } from './config/envs';
 import { CommonModule } from './common/common.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommonModule } from './common/common.module';
     EventReviewsModule,
     PostReactionsModule,
     SavedPostsModule,
+    ...(envs.analytics.enabled ? [AnalyticsModule] : []),
   ],
   controllers: [],
   providers: [],

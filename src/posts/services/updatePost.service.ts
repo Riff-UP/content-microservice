@@ -30,6 +30,6 @@ export class UpdatePostService {
     }
 
     this.logger.log(`Post updated: ${id}`);
-    return post!;
+    return post;
   }
 }

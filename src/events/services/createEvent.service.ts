@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PublisherService } from '../../common/publisher.service';
@@ -27,7 +32,9 @@ export class CreateEventService implements OnModuleInit {
     const userRef = await this.usersService.get(dto.sql_user_id);
     if (!userRef) {
       this.logger.warn(`User ${dto.sql_user_id} not replicated yet`);
-      throw new UnauthorizedException('User not replicated yet. Authenticate first.');
+      throw new UnauthorizedException(
+        'User not replicated yet. Authenticate first.',
+      );
     }
 
     const event = await this.eventModel.create(dto);

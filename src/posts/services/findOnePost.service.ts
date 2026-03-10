@@ -22,6 +22,6 @@ export class FindOnePostService {
       RpcExceptionHelper.notFound('Post', id);
     }
     this.logger.log(`Post found: ${id}`);
-    return post!;
+    return post;
   }
 }

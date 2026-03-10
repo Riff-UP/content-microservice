@@ -25,6 +25,6 @@ export class RemoveSavedPostService {
     }
 
     this.logger.log(`Saved post removed: ${id}`);
-    return savedPost!;
+    return savedPost;
   }
 }

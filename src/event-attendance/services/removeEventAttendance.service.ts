@@ -28,6 +28,6 @@ export class RemoveEventAttendanceService {
     }
 
     this.logger.log(`Attendance removed: ${id}`);
-    return removed!;
+    return removed;
   }
 }

@@ -44,7 +44,9 @@ export class SavedPostsController {
 
   @MessagePattern('content.savedPosts.create')
   create(@Payload() payload: SavedPostPayload) {
-    this.logger.log(`content.savedPosts.create payload: ${JSON.stringify(payload)}`);
+    this.logger.log(
+      `content.savedPosts.create payload: ${JSON.stringify(payload)}`,
+    );
     return this.createSavedPostService.execute(this.buildCreateDto(payload));
   }
 
@@ -56,7 +58,6 @@ export class SavedPostsController {
 
   @MessagePattern('content.savedPosts.findAll')
   findAll(@Payload() payload: SavedPostPayload) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const sql_user_id = extractId(payload?.sql_user_id ?? payload?.userId);
     this.logger.log(`content.savedPosts.findAll for user: ${sql_user_id}`);
     return this.findSavedPostsByUserService.execute(sql_user_id);
@@ -64,7 +65,6 @@ export class SavedPostsController {
 
   @MessagePattern('findAllSavedPosts')
   findAllSavedPosts(@Payload() payload: SavedPostPayload) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const sql_user_id = extractId(payload?.sql_user_id ?? payload?.userId);
     this.logger.log(`findAllSavedPosts for user: ${sql_user_id}`);
     return this.findSavedPostsByUserService.execute(sql_user_id);
@@ -88,7 +88,12 @@ export class SavedPostsController {
   removeByPostAndUser(@Payload() payload: SavedPostPayload) {
     const post_id = payload.post_id ?? payload.postId ?? '';
     const sql_user_id = payload.sql_user_id ?? payload.userId ?? '';
-    this.logger.log(`removeSavedPostByPostAndUser post_id: ${post_id}, user: ${sql_user_id}`);
-    return this.removeSavedPostByPostAndUserService.execute(post_id, sql_user_id);
+    this.logger.log(
+      `removeSavedPostByPostAndUser post_id: ${post_id}, user: ${sql_user_id}`,
+    );
+    return this.removeSavedPostByPostAndUserService.execute(
+      post_id,
+      sql_user_id,
+    );
   }
 }

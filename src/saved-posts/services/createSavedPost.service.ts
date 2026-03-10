@@ -34,9 +34,7 @@ export class CreateSavedPostService {
     }
 
     const savedPost = await this.savedPostModel.create(dto);
-    this.logger.log(
-      `✅ Post ${dto.post_id} saved by user ${dto.sql_user_id}`,
-    );
+    this.logger.log(`✅ Post ${dto.post_id} saved by user ${dto.sql_user_id}`);
     return savedPost;
   }
 }

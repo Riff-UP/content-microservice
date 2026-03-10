@@ -26,6 +26,6 @@ export class FindOneEventReviewService {
       RpcExceptionHelper.notFound('EventReview', id);
     }
     this.logger.log(`Review found: ${id}`);
-    return review!;
+    return review;
   }
 }

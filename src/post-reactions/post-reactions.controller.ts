@@ -14,7 +14,7 @@ export class PostReactionsController {
   constructor(
     private readonly createPostReactionService: CreatePostReactionService,
     private readonly findReactionsByPostService: FindReactionsByPostService,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     private readonly findReactionsByUserService: FindReactionsByUserService,
     private readonly removePostReactionService: RemovePostReactionService,
     private readonly findReactionsByPostAndUserService: FindReactionsByPostAndUserService,
@@ -60,7 +60,13 @@ export class PostReactionsController {
 
   @MessagePattern('findReactionsByPostAndUser')
   findByPostAndUser(
-    @Payload() payload: { postId?: string; post_id?: string; userId?: string; sql_user_id?: string },
+    @Payload()
+    payload: {
+      postId?: string;
+      post_id?: string;
+      userId?: string;
+      sql_user_id?: string;
+    },
   ) {
     // Mapear postId → post_id y userId → sql_user_id
     const postId = payload.post_id ?? payload.postId ?? '';
@@ -71,4 +77,3 @@ export class PostReactionsController {
     return this.findReactionsByPostAndUserService.execute(sqlUserId, postId);
   }
 }
-

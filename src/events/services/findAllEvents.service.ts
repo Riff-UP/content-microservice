@@ -58,9 +58,7 @@ export class FindAllEventsService {
       .sort({ event_date: 1 })
       .exec();
 
-    this.logger.log(
-      `Found ${events.length} events for organizer ${sqlUserId}`,
-    );
+    this.logger.log(`Found ${events.length} events for organizer ${sqlUserId}`);
     return events;
   }
 }

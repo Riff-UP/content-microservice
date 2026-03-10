@@ -28,6 +28,6 @@ export class RemovePostReactionService {
     }
 
     this.logger.log(`Reaction removed: ${id}`);
-    return reaction!;
+    return reaction;
   }
 }

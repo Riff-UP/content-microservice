@@ -32,7 +32,6 @@ export class RemoveSavedPostByPostAndUserService {
     }
 
     this.logger.log(`Post ${postId} unsaved by user ${sqlUserId}`);
-    return savedPost!;
+    return savedPost;
   }
 }
-

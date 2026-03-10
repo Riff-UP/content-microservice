@@ -23,7 +23,9 @@ export class EventsController {
 
   @MessagePattern('createEvent')
   create(@Payload() payload: any) {
-    this.logger.log(`Received createEvent with payload: ${JSON.stringify(payload)}`);
+    this.logger.log(
+      `Received createEvent with payload: ${JSON.stringify(payload)}`,
+    );
 
     // Transform userId to sql_user_id if needed
     const dto: CreateEventDto = {
@@ -55,7 +57,9 @@ export class EventsController {
 
   @MessagePattern('updateEvent')
   update(@Payload() payload: any) {
-    this.logger.log(`📥 Received updateEvent with payload: ${JSON.stringify(payload)}`);
+    this.logger.log(
+      `📥 Received updateEvent with payload: ${JSON.stringify(payload)}`,
+    );
 
     // Transform userId to sql_user_id if needed
     const dto: UpdateEventDto = {

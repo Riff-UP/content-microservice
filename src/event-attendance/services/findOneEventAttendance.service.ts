@@ -26,6 +26,6 @@ export class FindOneEventAttendanceService {
       RpcExceptionHelper.notFound('EventAttendance', id);
     }
     this.logger.log(`Attendance found: ${id}`);
-    return record!;
+    return record;
   }
 }

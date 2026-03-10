@@ -32,12 +32,12 @@ export class UpdateEventService {
 
     await this.publisher.publish('event.updated', {
       type: 'event_update',
-      message: `Event updated: ${updated!.title}`,
-      userId: updated!.sql_user_id,
+      message: `Event updated: ${updated.title}`,
+      userId: updated.sql_user_id,
       eventId: id,
     });
 
     this.logger.log(`Event updated and emitted: ${id}`);
-    return updated!;
+    return updated;
   }
 }

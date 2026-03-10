@@ -34,6 +34,6 @@ export class UpdateEventAttendanceService {
     }
 
     this.logger.log(`Attendance updated: ${id}`);
-    return updated!;
+    return updated;
   }
 }

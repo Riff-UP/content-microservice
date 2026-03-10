@@ -34,6 +34,6 @@ export class UpdateEventReviewService {
     }
 
     this.logger.log(`Review updated: ${id}`);
-    return updated!;
+    return updated;
   }
 }

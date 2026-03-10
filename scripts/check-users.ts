@@ -23,7 +23,9 @@ async function checkUsers() {
 
     if (users.length === 0) {
       console.log('\n⚠️  NO USERS FOUND IN CACHE!');
-      console.log('This means the auth.tokenGenerated event is not being processed.');
+      console.log(
+        'This means the auth.tokenGenerated event is not being processed.',
+      );
     }
   } catch (error) {
     console.error('❌ Error:', error);
@@ -33,4 +35,3 @@ async function checkUsers() {
 }
 
 checkUsers();
-

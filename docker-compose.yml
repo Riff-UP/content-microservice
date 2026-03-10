@@ -19,8 +19,29 @@ services:
       - R2_SECRET_KEY=${R2_SECRET_KEY}
       - R2_BUCKET=${R2_BUCKET}
       - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+      - ANALYTICS_DB_URL=postgresql://${ANALYTICS_DB_USER:-content_analytics}:${ANALYTICS_DB_PASSWORD:-content_analytics}@analytics-db:5432/${ANALYTICS_DB_NAME:-content_analytics}
+      - ANALYTICS_DB_SSL=${ANALYTICS_DB_SSL:-false}
+      - ANALYTICS_PROJECT_ID=${ANALYTICS_PROJECT_ID:-content-ms}
+      - ANALYTICS_PROJECT_ID_NUMERIC=${ANALYTICS_PROJECT_ID_NUMERIC:-0}
+      - ANALYTICS_PROJECT_TYPE=${ANALYTICS_PROJECT_TYPE:-SOCIAL_NETWORK}
+      - ANALYTICS_DB_ENGINE=${ANALYTICS_DB_ENGINE:-POSTGRESQL}
+      - ANALYTICS_DB_VERSION=${ANALYTICS_DB_VERSION:-16}
+      - ANALYTICS_INDEX_STRATEGY=${ANALYTICS_INDEX_STRATEGY:-BASELINE_INDEX}
+      - ANALYTICS_REGISTERED_EMAIL=${ANALYTICS_REGISTERED_EMAIL:-}
+      - ANALYTICS_REGISTERED_DATE=${ANALYTICS_REGISTERED_DATE:-}
+      - ANALYTICS_AUTO_RESET=${ANALYTICS_AUTO_RESET:-false}
+      - ANALYTICS_CALLBACK_URL=${ANALYTICS_CALLBACK_URL:-http://localhost:3004/analytics/auth/google/callback}
+      - ANALYTICS_ACCESS_TOKEN=${ANALYTICS_ACCESS_TOKEN:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN:-}
+      - BIGQUERY_PROJECT_ID=${BIGQUERY_PROJECT_ID:-data-from-software}
+      - BIGQUERY_DATASET=${BIGQUERY_DATASET:-benchmarking_warehouse}
+      - BIGQUERY_TABLE=${BIGQUERY_TABLE:-daily_query_metrics}
     depends_on:
       content-db:
+        condition: service_healthy
+      analytics-db:
         condition: service_healthy
     networks:
       - riff-network
@@ -46,8 +67,39 @@ services:
     networks:
       - riff-network
 
+  analytics-db:
+    image: postgres:16
+    container_name: riff_content_analytics
+    restart: always
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=all
+      - -c
+      - pg_stat_statements.max=10000
+    environment:
+      - POSTGRES_DB=${ANALYTICS_DB_NAME:-content_analytics}
+      - POSTGRES_USER=${ANALYTICS_DB_USER:-content_analytics}
+      - POSTGRES_PASSWORD=${ANALYTICS_DB_PASSWORD:-content_analytics}
+    ports:
+      - ${ANALYTICS_DB_PORT:-5435}:5432
+    volumes:
+      - analytics_pg_data:/var/lib/postgresql/data
+      - ./database/analytics/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${ANALYTICS_DB_USER:-content_analytics} -d ${ANALYTICS_DB_NAME:-content_analytics}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - riff-network
+
 volumes:
   mongo_data:
+  analytics_pg_data:
 
 networks:
   riff-network:

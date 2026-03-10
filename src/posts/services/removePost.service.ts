@@ -24,6 +24,6 @@ export class RemovePostService {
     }
 
     this.logger.log(`Post removed: ${id}`);
-    return post!;
+    return post;
   }
 }
