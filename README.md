@@ -2,6 +2,26 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
+## Nota de arquitectura
+
+`content-microservice` **no debe ser consumido directamente por ningún frontend**.
+
+La ruta correcta es:
+
+- frontend → `client/front-gateway` por HTTP
+- `client/front-gateway` → `content-microservice` por TCP / RPC
+
+Esto aplica también para `analytics`: el frontend no debe usar el puerto HTTP de este microservicio como API pública.
+
+## Analytics PostgreSQL separado (opción A)
+
+El módulo `analytics` de este servicio debe usar una **base PostgreSQL separada**, distinta a cualquier DB de `users-ms`.
+
+Referencia de configuración:
+- variable principal: `ANALYTICS_DB_URL`
+- local por Docker: servicio `analytics-db` en `docker-compose.yml`
+- despliegue: usar un Postgres dedicado para analytics y correr `npm run analytics:migrate`
+
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 

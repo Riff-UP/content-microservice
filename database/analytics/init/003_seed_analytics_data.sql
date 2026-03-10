@@ -1,7 +1,7 @@
 INSERT INTO analytics.experiment_config (variable_name, variable_value, description)
 VALUES
   ('project_id', 'content-ms', 'Identificador textual del microservicio'),
-  ('project_id_numeric', '0', 'Identificador numérico asignado al proyecto'),
+  ('project_id_numeric', '1', 'Identificador numérico asignado al proyecto'),
   ('project_type', 'SOCIAL_NETWORK', 'Tipo de dominio del proyecto'),
   ('db_engine', 'POSTGRESQL', 'Motor de base de datos para analytics'),
   ('db_version', '16', 'Versión de PostgreSQL del contenedor analytics'),
@@ -98,4 +98,3 @@ SET category = EXCLUDED.category,
     query_text = EXCLUDED.query_text,
     description = EXCLUDED.description,
     is_active = true;
-

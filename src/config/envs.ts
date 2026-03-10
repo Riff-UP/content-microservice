@@ -91,7 +91,7 @@ const envSchema = joi
       .falsy('false')
       .default(false),
     ANALYTICS_PROJECT_ID: joi.string().default('content-ms'),
-    ANALYTICS_PROJECT_ID_NUMERIC: joi.number().default(0),
+    ANALYTICS_PROJECT_ID_NUMERIC: joi.number().default(1),
     ANALYTICS_PROJECT_TYPE: joi.string().default('SOCIAL_NETWORK'),
     ANALYTICS_DB_ENGINE: joi.string().default('POSTGRESQL'),
     ANALYTICS_DB_VERSION: joi.string().default('16'),
@@ -152,7 +152,7 @@ export const envs: AppEnvConfig = {
     autoReset: Boolean(envVars.ANALYTICS_AUTO_RESET),
     callbackUrl:
       envVars.ANALYTICS_CALLBACK_URL ||
-      'http://localhost:3004/analytics/auth/google/callback',
+      'http://localhost:3000/api/analytics/auth/google/callback',
     accessToken: envVars.ANALYTICS_ACCESS_TOKEN || '',
     googleClientId: envVars.GOOGLE_CLIENT_ID || '',
     googleClientSecret: envVars.GOOGLE_CLIENT_SECRET || '',

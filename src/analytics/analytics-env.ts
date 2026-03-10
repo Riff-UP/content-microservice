@@ -43,7 +43,7 @@ export const analyticsEnv: AnalyticsRuntimeConfig = {
   dbUrl,
   dbSsl: parseBoolean(process.env.ANALYTICS_DB_SSL, false),
   projectId: process.env.ANALYTICS_PROJECT_ID || 'content-ms',
-  projectIdNumeric: parseNumber(process.env.ANALYTICS_PROJECT_ID_NUMERIC, 0),
+  projectIdNumeric: parseNumber(process.env.ANALYTICS_PROJECT_ID_NUMERIC, 1),
   projectType: process.env.ANALYTICS_PROJECT_TYPE || 'SOCIAL_NETWORK',
   dbEngine: process.env.ANALYTICS_DB_ENGINE || 'POSTGRESQL',
   dbVersion: process.env.ANALYTICS_DB_VERSION || '16',
@@ -53,7 +53,7 @@ export const analyticsEnv: AnalyticsRuntimeConfig = {
   autoReset: parseBoolean(process.env.ANALYTICS_AUTO_RESET, false),
   callbackUrl:
     process.env.ANALYTICS_CALLBACK_URL ||
-    'http://localhost:3004/analytics/auth/google/callback',
+    'http://localhost:3000/api/analytics/auth/google/callback',
   accessToken: process.env.ANALYTICS_ACCESS_TOKEN || '',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',

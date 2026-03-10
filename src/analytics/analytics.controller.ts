@@ -1,6 +1,9 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RpcExceptionHelper } from '../common';
+// AnalyticsController es una superficie interna RPC/TCP.
+// El frontend nunca debe llamar a content-ms directamente; el acceso público
+// debe entrar por client/front-gateway y traducirse a estos message patterns.
 import { AnalyticsRepository } from './analytics.repository';
 import { TriggerSnapshotDto } from './dto/trigger-snapshot.dto';
 import { TriggerWorkloadDto } from './dto/trigger-workload.dto';
@@ -113,7 +116,7 @@ export class AnalyticsController {
       RpcExceptionHelper.badRequest('Se requiere el campo code');
     }
 
-    return this.oauthService.exchangeCodeForTokens(payload.code!);
+    return this.oauthService.exchangeCodeForTokens(payload.code);
   }
 
   private parseLimit(
