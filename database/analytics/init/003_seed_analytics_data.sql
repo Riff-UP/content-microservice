@@ -16,62 +16,7 @@ SET variable_value = EXCLUDED.variable_value,
     description = EXCLUDED.description,
     updated_at = CURRENT_TIMESTAMP;
 
-INSERT INTO analytics.benchmark_posts (author_sql_user_id, title, content, created_at, deleted_at)
-SELECT
-  ((gs - 1) % 80) + 1,
-  'Benchmark post #' || gs,
-  repeat(md5(gs::text), 2),
-  CURRENT_TIMESTAMP - ((gs % 240) || ' hours')::interval,
-  CASE WHEN gs % 19 = 0 THEN CURRENT_TIMESTAMP - ((gs % 48) || ' hours')::interval ELSE NULL END
-FROM generate_series(1, 800) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_posts);
-
-INSERT INTO analytics.benchmark_events (creator_sql_user_id, title, description, event_date, created_at, cancelled_at)
-SELECT
-  ((gs - 1) % 60) + 1,
-  'Benchmark event #' || gs,
-  repeat(md5((gs * 13)::text), 2),
-  CURRENT_TIMESTAMP + (((gs % 90) - 45) || ' days')::interval,
-  CURRENT_TIMESTAMP - ((gs % 180) || ' hours')::interval,
-  CASE WHEN gs % 23 = 0 THEN CURRENT_TIMESTAMP - ((gs % 12) || ' days')::interval ELSE NULL END
-FROM generate_series(1, 250) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_events);
-
-INSERT INTO analytics.benchmark_event_attendance (event_id, attendee_sql_user_id, status, responded_at)
-SELECT DISTINCT ON (event_id, attendee_sql_user_id)
-  ((gs - 1) % 250) + 1,
-  ((gs * 7 - 1) % 120) + 1,
-  CASE gs % 3 WHEN 0 THEN 'confirmed' WHEN 1 THEN 'pending' ELSE 'declined' END,
-  CURRENT_TIMESTAMP - ((gs % 360) || ' hours')::interval
-FROM generate_series(1, 1800) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_event_attendance);
-
-INSERT INTO analytics.benchmark_event_reviews (event_id, reviewer_sql_user_id, rating, review_text, created_at)
-SELECT DISTINCT ON (event_id, reviewer_sql_user_id)
-  ((gs - 1) % 250) + 1,
-  ((gs * 11 - 1) % 120) + 1,
-  ((gs - 1) % 5) + 1,
-  'Review #' || gs || ' ' || md5((gs * 17)::text),
-  CURRENT_TIMESTAMP - ((gs % 240) || ' hours')::interval
-FROM generate_series(1, 900) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_event_reviews);
-
-INSERT INTO analytics.benchmark_post_reactions (post_id, sql_user_id, reaction_type, created_at)
-SELECT DISTINCT ON (post_id, sql_user_id)
-  ((gs - 1) % 800) + 1,
-  ((gs * 5 - 1) % 120) + 1,
-  CASE gs % 4 WHEN 0 THEN 'like' WHEN 1 THEN 'love' WHEN 2 THEN 'fire' ELSE 'clap' END,
-  CURRENT_TIMESTAMP - ((gs % 300) || ' hours')::interval
-FROM generate_series(1, 2400) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_post_reactions);
-
-INSERT INTO analytics.benchmark_saved_posts (post_id, sql_user_id, saved_at)
-SELECT DISTINCT ON (post_id, sql_user_id)
-  ((gs - 1) % 800) + 1,
-  ((gs * 3 - 1) % 120) + 1,
-  CURRENT_TIMESTAMP - ((gs % 500) || ' hours')::interval
-FROM generate_series(1, 2200) AS gs
-WHERE NOT EXISTS (SELECT 1 FROM analytics.benchmark_saved_posts);
+-- Sin seed sintético: las tablas analytics.benchmark_* deben poblarse con datos reales generados por la app.
 
 INSERT INTO analytics.queries (query_name, category, query_text, description)
 VALUES
