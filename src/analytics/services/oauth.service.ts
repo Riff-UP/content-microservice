@@ -1,13 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { envs } from '../../config';
 
 @Injectable()
 export class OAuthService {
   getAuthorizationUrl(state?: string) {
     if (!envs.analytics.googleClientId || !envs.analytics.callbackUrl) {
-      throw new BadRequestException(
-        'Faltan GOOGLE_CLIENT_ID o ANALYTICS_CALLBACK_URL en la configuración',
-      );
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
+        message:
+          'Faltan GOOGLE_CLIENT_ID o ANALYTICS_CALLBACK_URL en la configuración',
+      });
     }
 
     const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
@@ -31,9 +35,12 @@ export class OAuthService {
       !envs.analytics.googleClientSecret ||
       !envs.analytics.callbackUrl
     ) {
-      throw new BadRequestException(
-        'Faltan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o ANALYTICS_CALLBACK_URL',
-      );
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
+        message:
+          'Faltan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o ANALYTICS_CALLBACK_URL',
+      });
     }
 
     const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -53,9 +60,11 @@ export class OAuthService {
     const payload = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
-      throw new BadRequestException({
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
         message: 'No se pudo intercambiar el authorization code por tokens',
-        detail: payload,
+        details: payload,
       });
     }
 
@@ -87,9 +96,11 @@ export class OAuthService {
     const payload = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
-      throw new BadRequestException({
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
         message: 'No se pudo refrescar el access token',
-        detail: payload,
+        details: payload,
       });
     }
 
