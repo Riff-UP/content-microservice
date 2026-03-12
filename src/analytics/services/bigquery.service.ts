@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { envs } from '../../config';
 import { BigQueryMetricRow } from '../types';
 
@@ -12,7 +13,9 @@ export class BigQueryService {
     const payload = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
-      throw new BadRequestException({
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
         message: 'Token inválido o expirado para BigQuery',
         detail: payload,
       });
@@ -45,9 +48,22 @@ export class BigQueryService {
     const payload = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
-      throw new BadRequestException({
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BAD_REQUEST',
         message: 'BigQuery rechazó el envío de métricas',
         detail: payload,
+      });
+    }
+
+    // insertAll siempre retorna HTTP 200 — los errores de fila van en insertErrors
+    const insertErrors = payload.insertErrors as unknown[] | undefined;
+    if (insertErrors && insertErrors.length > 0) {
+      throw new RpcException({
+        statusCode: 400,
+        code: 'BIGQUERY_INSERT_ERRORS',
+        message: `BigQuery rechazó ${insertErrors.length} fila(s). Revisa el schema de la tabla.`,
+        detail: insertErrors,
       });
     }
 
