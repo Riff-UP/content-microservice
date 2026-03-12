@@ -86,8 +86,6 @@ export class MetricsService {
     return {
       project_id: this.parseIntSafe(metric.project_id_numeric),
       snapshot_date: this.formatDateOnly(metric.snapshot_date),
-      query_name: metric.query_name || '',
-      category: metric.category || '',
       queryid: metric.queryid || '',
       dbid: this.parseIntSafe(metric.dbid),
       userid: this.parseIntSafe(metric.userid),

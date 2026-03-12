@@ -48,8 +48,6 @@ export interface AnalyticsRawMetricRow {
 export interface BigQueryMetricRow {
   project_id: number;
   snapshot_date: string;
-  query_name: string;
-  category: string;
   queryid: string;
   dbid: number;
   userid: number;
