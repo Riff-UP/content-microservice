@@ -5,6 +5,7 @@ import { PublisherService } from '../../common/publisher.service';
 import { Post } from '../schemas/post.schema';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { RpcExceptionHelper } from '../../common';
+import { detectProvider } from '../utils/provider-detector.util';
 
 @Injectable()
 export class createPostService implements OnModuleInit {
@@ -46,26 +47,36 @@ export class createPostService implements OnModuleInit {
       );
     }
 
-    // Para type:'audio', validar SoundCloud
+    // ── Para type:'audio', detectar proveedor automáticamente ──
     if (createPostDto.type === 'audio') {
-      const contentUrl = createPostDto.content || '';
-      if (
-        createPostDto.provider?.toLowerCase() === 'soundcloud' ||
-        /soundcloud\.com/.test(contentUrl)
-      ) {
-        // Construir embed de SoundCloud
-        createPostDto.provider = 'soundcloud';
-        createPostDto.provider_meta = {
-          provider_url: contentUrl,
-        };
-        createPostDto.content = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
-          contentUrl,
-        )}&color=%23ff5500&auto_play=false&show_artwork=true`;
-      } else if (!createPostDto.content) {
+      const rawUrl = createPostDto.content || '';
+
+      if (!rawUrl) {
         RpcExceptionHelper.badRequest(
-          'content (audio URL) is required for audio posts',
+          'content (URL de la canción) es requerido para posts de audio',
         );
+        return;
       }
+
+      const detected = detectProvider(rawUrl);
+
+      if (!detected) {
+        RpcExceptionHelper.badRequest(
+          'URL no reconocida. Pega un enlace de YouTube, SoundCloud, Spotify o Bandcamp.',
+        );
+        return;
+      }
+
+      this.logger.log(
+        `🎵 Provider detected: ${detected.provider} for URL: ${rawUrl}`,
+      );
+
+      // Sobrescribir con los valores normalizados
+      createPostDto.provider = detected.provider;
+      createPostDto.content = detected.embedUrl;
+      createPostDto.provider_meta = {
+        provider_url: detected.originalUrl,
+      };
     }
 
     // Crear post
@@ -94,7 +105,7 @@ export class createPostService implements OnModuleInit {
       userId: createPostDto.sql_user_id,
     });
 
-    this.logger.log(`✅ Post created successfully: ${String(post._id)}`);
+    this.logger.log(`Post created successfully: ${String(post._id)}`);
     return post;
   }
 }
