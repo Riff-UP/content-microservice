@@ -5,6 +5,7 @@ import { UpdateEventReviewDto } from './dto/update-event-review.dto';
 import { CreateEventReviewService } from './services/createEventReview.service';
 import { FindAllEventReviewsService } from './services/findAllEventReviews.service';
 import { FindReviewsByEventService } from './services/findReviewsByEvent.service';
+import { FindReviewsByUserService } from './services/findReviewsByUser.service';
 import { FindOneEventReviewService } from './services/findOneEventReview.service';
 import { UpdateEventReviewService } from './services/updateEventReview.service';
 import { RemoveEventReviewService } from './services/removeEventReview.service';
@@ -17,6 +18,7 @@ export class EventReviewsController {
     private readonly createEventReviewService: CreateEventReviewService,
     private readonly findAllEventReviewsService: FindAllEventReviewsService,
     private readonly findReviewsByEventService: FindReviewsByEventService,
+    private readonly findReviewsByUserService: FindReviewsByUserService,
     private readonly findOneEventReviewService: FindOneEventReviewService,
     private readonly updateEventReviewService: UpdateEventReviewService,
     private readonly removeEventReviewService: RemoveEventReviewService,
@@ -39,6 +41,11 @@ export class EventReviewsController {
   @MessagePattern('findReviewsByEvent')
   findByEvent(@Payload() payload: { event_id: string }) {
     return this.findReviewsByEventService.execute(payload.event_id);
+  }
+
+  @MessagePattern('findReviewsByUser')
+  findByUser(@Payload() payload: { userId: string }) {
+    return this.findReviewsByUserService.execute(payload.userId);
   }
 
   @MessagePattern('findOneEventReview')

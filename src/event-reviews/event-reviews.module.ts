@@ -10,6 +10,7 @@ import { FindReviewsByEventService } from './services/findReviewsByEvent.service
 import { FindOneEventReviewService } from './services/findOneEventReview.service';
 import { UpdateEventReviewService } from './services/updateEventReview.service';
 import { RemoveEventReviewService } from './services/removeEventReview.service';
+import { FindReviewsByUserService } from './services/findReviewsByUser.service';
 
 @Module({
   controllers: [EventReviewsController, EventReviewsConsumerController],
@@ -20,6 +21,7 @@ import { RemoveEventReviewService } from './services/removeEventReview.service';
     FindOneEventReviewService,
     UpdateEventReviewService,
     RemoveEventReviewService,
+    FindReviewsByUserService
   ],
   imports: [
     MongooseModule.forFeature([
