@@ -15,16 +15,14 @@ export class FindAttendanceByUserService {
     private readonly attendanceModel: Model<EventAttendanceDocument>,
   ) {}
 
-  // El gateway pasa { userId } que es el UUID de MongoDB (campo userId en el schema)
+  // El gateway envía { userId } — que en el schema se almacena como sql_user_id
   async execute(userId: string): Promise<EventAttendanceDocument[]> {
     const records = await this.attendanceModel
-      .find({ userId, status: { $ne: 'cancelled' } })
+      .find({ sql_user_id: userId, status: { $ne: 'cancelled' } })
       .sort({ created_at: -1 })
       .exec();
 
-    this.logger.log(
-      `Found ${records.length} attendance records for user ${userId}`,
-    );
+    this.logger.log(`Found ${records.length} attendance records for user ${userId}`);
     return records;
   }
 }
