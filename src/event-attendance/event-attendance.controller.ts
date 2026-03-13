@@ -4,6 +4,7 @@ import { CreateEventAttendanceDto } from './dto/create-event-attendance.dto';
 import { UpdateEventAttendanceDto } from './dto/update-event-attendance.dto';
 import { CreateEventAttendanceService } from './services/createEventAttendance.service';
 import { FindAttendanceByEventService } from './services/findAttendanceByEvent.service';
+import { FindAttendanceByUserService } from './services/findAttendanceByUser.service';
 import { FindOneEventAttendanceService } from './services/findOneEventAttendance.service';
 import { UpdateEventAttendanceService } from './services/updateEventAttendance.service';
 import { RemoveEventAttendanceService } from './services/removeEventAttendance.service';
@@ -15,6 +16,7 @@ export class EventAttendanceController {
   constructor(
     private readonly createEventAttendanceService: CreateEventAttendanceService,
     private readonly findAttendanceByEventService: FindAttendanceByEventService,
+    private readonly findAttendanceByUserService: FindAttendanceByUserService,
     private readonly findOneEventAttendanceService: FindOneEventAttendanceService,
     private readonly updateEventAttendanceService: UpdateEventAttendanceService,
     private readonly removeEventAttendanceService: RemoveEventAttendanceService,
@@ -33,6 +35,11 @@ export class EventAttendanceController {
   @MessagePattern('findAttendanceByEvent')
   findByEvent(@Payload() payload: { event_id: string }) {
     return this.findAttendanceByEventService.execute(payload.event_id);
+  }
+
+  @MessagePattern('findAttendanceByUser')
+  findByUser(@Payload() payload: { userId: string }) {
+    return this.findAttendanceByUserService.execute(payload.userId);
   }
 
   @MessagePattern('findOneEventAttendance')
