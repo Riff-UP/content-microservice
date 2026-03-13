@@ -9,6 +9,7 @@ import { FindReviewsByUserService } from './services/findReviewsByUser.service';
 import { FindOneEventReviewService } from './services/findOneEventReview.service';
 import { UpdateEventReviewService } from './services/updateEventReview.service';
 import { RemoveEventReviewService } from './services/removeEventReview.service';
+import { FindPendingReviewsService } from './services/findPendingReviews.service';
 
 @Controller()
 export class EventReviewsController {
@@ -22,6 +23,7 @@ export class EventReviewsController {
     private readonly findOneEventReviewService: FindOneEventReviewService,
     private readonly updateEventReviewService: UpdateEventReviewService,
     private readonly removeEventReviewService: RemoveEventReviewService,
+    private readonly findPendingReviewsService: FindPendingReviewsService,
   ) {}
 
   @MessagePattern('createEventReview')
@@ -65,5 +67,10 @@ export class EventReviewsController {
   @MessagePattern('removeEventReview')
   remove(@Payload() payload: { id: string }) {
     return this.removeEventReviewService.execute(payload.id);
+  }
+
+  @MessagePattern('findPendingReviews')
+  findPending(@Payload() payload: { userId: string }) {
+    return this.findPendingReviewsService.execute(payload.userId);
   }
 }

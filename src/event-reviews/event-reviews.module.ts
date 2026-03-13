@@ -11,6 +11,9 @@ import { FindOneEventReviewService } from './services/findOneEventReview.service
 import { UpdateEventReviewService } from './services/updateEventReview.service';
 import { RemoveEventReviewService } from './services/removeEventReview.service';
 import { FindReviewsByUserService } from './services/findReviewsByUser.service';
+import { FindPendingReviewsService } from './services/findPendingReviews.service';
+import { Event, EventSchema } from '../events/schemas/event.schema';
+import { EventAttendance, EventAttendanceSchema } from '../event-attendance/schemas/event-attendance.schema';
 
 @Module({
   controllers: [EventReviewsController, EventReviewsConsumerController],
@@ -21,11 +24,14 @@ import { FindReviewsByUserService } from './services/findReviewsByUser.service';
     FindOneEventReviewService,
     UpdateEventReviewService,
     RemoveEventReviewService,
-    FindReviewsByUserService
+    FindReviewsByUserService,
+    FindPendingReviewsService,
   ],
   imports: [
     MongooseModule.forFeature([
       { name: EventReview.name, schema: EventReviewSchema },
+      { name: Event.name, schema: EventSchema },
+      { name: EventAttendance.name, schema: EventAttendanceSchema },
     ]),
     UsersModule,
   ],
