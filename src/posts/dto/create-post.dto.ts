@@ -29,4 +29,24 @@ export class CreatePostDto {
   provider_meta?: {
     provider_url?: string;
   };
+
+  @IsOptional()
+  @IsString()
+  artistName?: string;
+
+  @IsOptional()
+  @IsString()
+  artistSlug?: string;
+
+  @IsOptional()
+  @IsString()
+  artistAvatar?: string;
+
+  @IsOptional()
+  @IsString()
+  postPathBase?: string;
+
+  @IsOptional()
+  @IsString()
+  postUrlBase?: string;
 }

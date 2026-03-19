@@ -14,6 +14,12 @@ import { UsersService } from '../../users/users.service';
 @Injectable()
 export class CreateEventService implements OnModuleInit {
   private readonly logger = new Logger(CreateEventService.name);
+  private readonly frontendBaseUrl =
+    process.env.FRONTEND_URL || process.env.FRONTEND_BASE_URL || '';
+
+  private trimTrailingSlash(value: string): string {
+    return value.replace(/\/+$/, '');
+  }
 
   constructor(
     @InjectModel(Event.name)
@@ -38,15 +44,30 @@ export class CreateEventService implements OnModuleInit {
     }
 
     const event = await this.eventModel.create(dto);
+    const eventId = String(event._id);
+    const pathBase = dto.eventPathBase || '/events';
+    const normalizedPathBase = pathBase.startsWith('/')
+      ? pathBase
+      : `/${pathBase}`;
+    const urlBaseFromPayload = dto.eventUrlBase?.trim() || '';
+    const urlBaseFromEnv = this.frontendBaseUrl
+      ? `${this.trimTrailingSlash(this.frontendBaseUrl)}${normalizedPathBase}`
+      : '';
+    const eventUrlBase = urlBaseFromPayload || urlBaseFromEnv;
+    const eventUrl = eventUrlBase
+      ? `${this.trimTrailingSlash(eventUrlBase)}/${eventId}`
+      : `${this.trimTrailingSlash(normalizedPathBase)}/${eventId}`;
 
     await this.publisher.publish('event.created', {
       type: 'new_event',
       message: `New event: ${event.title}`,
       userId: event.sql_user_id,
-      artistName: userRef.name,
-      artistSlug: userRef.slug,
-      artistAvatar: userRef.picture,
-      eventId: String(event._id),
+      artistName: dto.artistName || userRef.name,
+      artistSlug: dto.artistSlug || userRef.slug,
+      artistAvatar: dto.artistAvatar || userRef.picture,
+      eventId,
+      eventUrl,
+      deepLink: eventUrl,
     });
 
     // Publish event to promote user to ARTIST role (users-ms listens)

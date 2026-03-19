@@ -17,6 +17,12 @@ type ArtistSnapshot = {
 @Injectable()
 export class createPostService implements OnModuleInit {
   private readonly logger = new Logger('PostCreationService');
+  private readonly frontendBaseUrl =
+    process.env.FRONTEND_URL || process.env.FRONTEND_BASE_URL || '';
+
+  private trimTrailingSlash(value: string): string {
+    return value.replace(/\/+$/, '');
+  }
 
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
@@ -106,16 +112,31 @@ export class createPostService implements OnModuleInit {
 
     const artistRef =
       artist ?? (await this.usersService.get(createPostDto.sql_user_id));
+    const postId = String(post._id);
+    const pathBase = createPostDto.postPathBase || '/posts';
+    const normalizedPathBase = pathBase.startsWith('/')
+      ? pathBase
+      : `/${pathBase}`;
+    const urlBaseFromPayload = createPostDto.postUrlBase?.trim() || '';
+    const urlBaseFromEnv = this.frontendBaseUrl
+      ? `${this.trimTrailingSlash(this.frontendBaseUrl)}${normalizedPathBase}`
+      : '';
+    const postUrlBase = urlBaseFromPayload || urlBaseFromEnv;
+    const postUrl = postUrlBase
+      ? `${this.trimTrailingSlash(postUrlBase)}/${postId}`
+      : `${this.trimTrailingSlash(normalizedPathBase)}/${postId}`;
 
     // Publish notification event
     await this.publisher.publish('post.created', {
       type: 'new_post',
       message: `New post: ${createPostDto.title}`,
       userId: createPostDto.sql_user_id,
-      artistName: artistRef?.name,
-      artistSlug: artistRef?.slug,
-      artistAvatar: artistRef?.picture,
-      postId: String(post._id),
+      artistName: createPostDto.artistName || artistRef?.name,
+      artistSlug: createPostDto.artistSlug || artistRef?.slug,
+      artistAvatar: createPostDto.artistAvatar || artistRef?.picture,
+      postId,
+      postUrl,
+      deepLink: postUrl,
     });
 
     // Publish event to promote user to ARTIST role

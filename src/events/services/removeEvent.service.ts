@@ -9,6 +9,12 @@ import { UsersService } from '../../users/users.service';
 @Injectable()
 export class RemoveEventService {
   private readonly logger = new Logger(RemoveEventService.name);
+  private readonly frontendBaseUrl =
+    process.env.FRONTEND_URL || process.env.FRONTEND_BASE_URL || '';
+
+  private trimTrailingSlash(value: string): string {
+    return value.replace(/\/+$/, '');
+  }
 
   constructor(
     @InjectModel(Event.name)
@@ -30,6 +36,18 @@ export class RemoveEventService {
     const removed = await this.eventModel.findByIdAndDelete(id).exec();
 
     const artistRef = await this.usersService.get(removed.sql_user_id);
+    const pathBase = removed.eventPathBase || '/events';
+    const normalizedPathBase = pathBase.startsWith('/')
+      ? pathBase
+      : `/${pathBase}`;
+    const urlBaseFromDoc = removed.eventUrlBase?.trim() || '';
+    const urlBaseFromEnv = this.frontendBaseUrl
+      ? `${this.trimTrailingSlash(this.frontendBaseUrl)}${normalizedPathBase}`
+      : '';
+    const eventUrlBase = urlBaseFromDoc || urlBaseFromEnv;
+    const eventUrl = eventUrlBase
+      ? `${this.trimTrailingSlash(eventUrlBase)}/${id}`
+      : `${this.trimTrailingSlash(normalizedPathBase)}/${id}`;
 
     await this.publisher.publish('event.cancelled', {
       type: 'event_cancelled',
@@ -39,6 +57,8 @@ export class RemoveEventService {
       artistSlug: artistRef?.slug,
       artistAvatar: artistRef?.picture,
       eventId: id,
+      eventUrl,
+      deepLink: eventUrl,
     });
 
     this.logger.log(`Event removed and cancellation emitted: ${id}`);

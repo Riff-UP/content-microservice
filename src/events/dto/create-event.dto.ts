@@ -28,4 +28,24 @@ export class CreateEventDto {
   @IsString()
   @IsOptional()
   coverImageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  artistName?: string;
+
+  @IsString()
+  @IsOptional()
+  artistSlug?: string;
+
+  @IsString()
+  @IsOptional()
+  artistAvatar?: string;
+
+  @IsString()
+  @IsOptional()
+  eventPathBase?: string;
+
+  @IsString()
+  @IsOptional()
+  eventUrlBase?: string;
 }
