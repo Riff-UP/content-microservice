@@ -67,6 +67,10 @@ export class PostsController {
 
     return this.createPostService.create(createPostDto, {
       _token: userRef.token,
+    }, {
+      name: userRef.name,
+      slug: userRef.slug,
+      picture: userRef.picture,
     });
   }
 

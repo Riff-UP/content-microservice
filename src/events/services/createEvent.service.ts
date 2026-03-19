@@ -43,6 +43,9 @@ export class CreateEventService implements OnModuleInit {
       type: 'new_event',
       message: `New event: ${event.title}`,
       userId: event.sql_user_id,
+      artistName: userRef.name,
+      artistSlug: userRef.slug,
+      artistAvatar: userRef.picture,
       eventId: String(event._id),
     });
 

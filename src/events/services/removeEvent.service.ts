@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class RemoveEventService {
@@ -13,6 +14,7 @@ export class RemoveEventService {
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly publisher: PublisherService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -27,10 +29,15 @@ export class RemoveEventService {
 
     const removed = await this.eventModel.findByIdAndDelete(id).exec();
 
+    const artistRef = await this.usersService.get(removed.sql_user_id);
+
     await this.publisher.publish('event.cancelled', {
       type: 'event_cancelled',
       message: `Event cancelled: ${removed.title}`,
       userId: removed.sql_user_id,
+      artistName: artistRef?.name,
+      artistSlug: artistRef?.slug,
+      artistAvatar: artistRef?.picture,
       eventId: id,
     });
 

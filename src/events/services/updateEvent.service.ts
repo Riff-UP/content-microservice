@@ -5,6 +5,7 @@ import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class UpdateEventService {
@@ -14,6 +15,7 @@ export class UpdateEventService {
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly publisher: PublisherService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -30,10 +32,15 @@ export class UpdateEventService {
       .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
 
+    const artistRef = await this.usersService.get(updated.sql_user_id);
+
     await this.publisher.publish('event.updated', {
       type: 'event_update',
       message: `Event updated: ${updated.title}`,
       userId: updated.sql_user_id,
+      artistName: artistRef?.name,
+      artistSlug: artistRef?.slug,
+      artistAvatar: artistRef?.picture,
       eventId: id,
     });
 

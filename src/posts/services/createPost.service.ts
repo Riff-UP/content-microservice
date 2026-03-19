@@ -6,6 +6,13 @@ import { Post } from '../schemas/post.schema';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { RpcExceptionHelper } from '../../common';
 import { detectProvider } from '../utils/provider-detector.util';
+import { UsersService } from '../../users/users.service';
+
+type ArtistSnapshot = {
+  name?: string;
+  slug?: string;
+  picture?: string;
+};
 
 @Injectable()
 export class createPostService implements OnModuleInit {
@@ -14,13 +21,18 @@ export class createPostService implements OnModuleInit {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     private readonly publisher: PublisherService,
+    private readonly usersService: UsersService,
   ) {}
 
   onModuleInit() {
     this.logger.log('PostCreationService initialized');
   }
 
-  async create(createPostDto: CreatePostDto, auth?: { _token?: string }) {
+  async create(
+    createPostDto: CreatePostDto,
+    auth?: { _token?: string },
+    artist?: ArtistSnapshot,
+  ) {
     this.logger.log(`Creating post: ${JSON.stringify(createPostDto)}`);
 
     // Require auth token
@@ -92,11 +104,17 @@ export class createPostService implements OnModuleInit {
       }),
     } as any);
 
+    const artistRef =
+      artist ?? (await this.usersService.get(createPostDto.sql_user_id));
+
     // Publish notification event
     await this.publisher.publish('post.created', {
       type: 'new_post',
       message: `New post: ${createPostDto.title}`,
       userId: createPostDto.sql_user_id,
+      artistName: artistRef?.name,
+      artistSlug: artistRef?.slug,
+      artistAvatar: artistRef?.picture,
       postId: String(post._id),
     });
 

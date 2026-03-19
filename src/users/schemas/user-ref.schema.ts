@@ -12,6 +12,9 @@ export class UserRef {
   name?: string;
 
   @Prop()
+  slug?: string;
+
+  @Prop()
   email?: string;
 
   @Prop()

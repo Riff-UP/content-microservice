@@ -8,6 +8,7 @@ interface EventPayloadWithUser {
   token?: string;
   email?: string;
   name?: string;
+  slug?: string;
   role?: string;
   googleId?: string;
   picture?: string;
@@ -15,6 +16,7 @@ interface EventPayloadWithUser {
     id?: string;
     email?: string;
     name?: string;
+    slug?: string;
     role?: string;
     googleId?: string;
     picture?: string;
@@ -41,6 +43,7 @@ export class postsConsumerController {
         token: data.token || '',
         email: data.email || data.user?.email || 'unknown@event.local',
         name: data.name || data.user?.name || 'Event User',
+        slug: data.slug || data.user?.slug || '',
         role: data.role || data.user?.role || 'user',
       };
 

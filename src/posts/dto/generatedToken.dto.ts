@@ -17,6 +17,10 @@ export class AuthTokenGeneratedDto {
 
   @IsString()
   @IsOptional()
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
   role?: string;
 
   @IsString()

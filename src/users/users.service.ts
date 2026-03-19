@@ -28,6 +28,7 @@ export class UsersService {
 
     const userRefData: Partial<UserRef> = {
       name: data.name,
+      slug: data.slug,
       email: data.email,
       googleId: data.googleId,
       picture: data.picture,
