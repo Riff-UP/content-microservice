@@ -5,6 +5,7 @@ import { PublisherService } from '../../common/publisher.service';
 import { Event, EventDocument } from '../schemas/event.schema';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
+import { EventReview, EventReviewDocument } from '../../event-reviews/schemas/event-reviews.schema'; 
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
@@ -14,6 +15,10 @@ export class UpdateEventService {
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
+
+    @InjectModel(EventReview.name) 
+    private readonly eventReviewModel: Model<EventReviewDocument>,
+    
     private readonly publisher: PublisherService,
     private readonly usersService: UsersService,
   ) {}
@@ -31,6 +36,24 @@ export class UpdateEventService {
     const updated = await this.eventModel
       .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
       .exec();
+
+    // 👇 3. LA MAGIA DEL TIEMPO: Limpieza de reseñas prematuras
+    if (dto.event_date) {
+      const newEventDate = new Date(dto.event_date);
+      const now = new Date();
+
+      // Si la nueva fecha es en el futuro (aún no ha pasado)...
+      if (newEventDate > now) {
+        // Borramos todas las reseñas asociadas a este evento
+        const deletedReviews = await this.eventReviewModel.deleteMany({ event_id: id }).exec();
+        
+        if (deletedReviews.deletedCount > 0) {
+          this.logger.log(
+            `⚠️ Time-travel detected: Removed ${deletedReviews.deletedCount} premature reviews for event ${id}`
+          );
+        }
+      }
+    }
 
     const artistRef = await this.usersService.get(updated.sql_user_id);
 
