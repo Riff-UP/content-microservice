@@ -6,6 +6,7 @@ import { FindReactionsByPostService } from './services/findReactionsByPost.servi
 import { FindReactionsByUserService } from './services/findReactionsByUser.service';
 import { RemovePostReactionService } from './services/removePostReaction.service';
 import { FindReactionsByPostAndUserService } from './services/findReactionsByPostAndUser.service';
+import { GetPostReactionsTotalService } from './services/getPostReactionsTotal.service';
 
 @Controller()
 export class PostReactionsController {
@@ -18,6 +19,7 @@ export class PostReactionsController {
     private readonly findReactionsByUserService: FindReactionsByUserService,
     private readonly removePostReactionService: RemovePostReactionService,
     private readonly findReactionsByPostAndUserService: FindReactionsByPostAndUserService,
+    private readonly getPostReactionsTotalService: GetPostReactionsTotalService,
   ) {}
 
   @MessagePattern('createPostReaction')
@@ -75,5 +77,11 @@ export class PostReactionsController {
       `findReactionsByPostAndUser - post_id: ${postId}, sql_user_id: ${sqlUserId}`,
     );
     return this.findReactionsByPostAndUserService.execute(sqlUserId, postId);
+  }
+
+  @MessagePattern('getPostReactionsTotal')
+  getPostReactionsTotal(@Payload() payload: { postId?: string; post_id?: string }) {
+    const postId = payload.post_id ?? payload.postId ?? '';
+    return this.getPostReactionsTotalService.execute(postId);
   }
 }

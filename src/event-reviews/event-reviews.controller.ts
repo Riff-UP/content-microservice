@@ -10,6 +10,7 @@ import { FindOneEventReviewService } from './services/findOneEventReview.service
 import { UpdateEventReviewService } from './services/updateEventReview.service';
 import { RemoveEventReviewService } from './services/removeEventReview.service';
 import { FindPendingReviewsService } from './services/findPendingReviews.service';
+import { GetEventRatingAverageService } from './services/getEventRatingAverage.service';
 
 @Controller()
 export class EventReviewsController {
@@ -24,6 +25,7 @@ export class EventReviewsController {
     private readonly updateEventReviewService: UpdateEventReviewService,
     private readonly removeEventReviewService: RemoveEventReviewService,
     private readonly findPendingReviewsService: FindPendingReviewsService,
+    private readonly getEventRatingAverageService: GetEventRatingAverageService,
   ) {}
 
   @MessagePattern('createEventReview')
@@ -72,5 +74,13 @@ export class EventReviewsController {
   @MessagePattern('findPendingReviews')
   findPending(@Payload() payload: { userId: string }) {
     return this.findPendingReviewsService.execute(payload.userId);
+  }
+
+  @MessagePattern('getEventRatingAverage')
+  getEventRatingAverage(
+    @Payload() payload: { eventId?: string; event_id?: string },
+  ) {
+    const eventId = payload.event_id ?? payload.eventId ?? '';
+    return this.getEventRatingAverageService.execute(eventId);
   }
 }

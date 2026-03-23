@@ -8,6 +8,7 @@ import { FindAttendanceByUserService } from './services/findAttendanceByUser.ser
 import { FindOneEventAttendanceService } from './services/findOneEventAttendance.service';
 import { UpdateEventAttendanceService } from './services/updateEventAttendance.service';
 import { RemoveEventAttendanceService } from './services/removeEventAttendance.service';
+import { GetEventAttendanceTotalService } from './services/getEventAttendanceTotal.service';
 
 @Controller()
 export class EventAttendanceController {
@@ -20,6 +21,7 @@ export class EventAttendanceController {
     private readonly findOneEventAttendanceService: FindOneEventAttendanceService,
     private readonly updateEventAttendanceService: UpdateEventAttendanceService,
     private readonly removeEventAttendanceService: RemoveEventAttendanceService,
+    private readonly getEventAttendanceTotalService: GetEventAttendanceTotalService,
   ) {}
 
   @MessagePattern('createEventAttendance')
@@ -59,5 +61,13 @@ export class EventAttendanceController {
   @MessagePattern('removeEventAttendance')
   remove(@Payload() payload: { id: string }) {
     return this.removeEventAttendanceService.execute(payload.id);
+  }
+
+  @MessagePattern('getEventAttendanceTotal')
+  getEventAttendanceTotal(
+    @Payload() payload: { eventId?: string; event_id?: string },
+  ) {
+    const eventId = payload.event_id ?? payload.eventId ?? '';
+    return this.getEventAttendanceTotalService.execute(eventId);
   }
 }

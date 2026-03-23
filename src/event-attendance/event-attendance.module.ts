@@ -13,6 +13,7 @@ import { FindOneEventAttendanceService } from './services/findOneEventAttendance
 import { UpdateEventAttendanceService } from './services/updateEventAttendance.service';
 import { RemoveEventAttendanceService } from './services/removeEventAttendance.service';
 import { FindAttendanceByUserService } from './services/findAttendanceByUser.service';
+import { GetEventAttendanceTotalService } from './services/getEventAttendanceTotal.service';
 
 @Module({
   controllers: [EventAttendanceController, EventAttendanceConsumerController],
@@ -22,7 +23,8 @@ import { FindAttendanceByUserService } from './services/findAttendanceByUser.ser
     FindOneEventAttendanceService,
     UpdateEventAttendanceService,
     RemoveEventAttendanceService,
-    FindAttendanceByUserService
+    FindAttendanceByUserService,
+    GetEventAttendanceTotalService,
   ],
   imports: [
     MongooseModule.forFeature([

@@ -12,6 +12,7 @@ import { FindReactionsByPostService } from './services/findReactionsByPost.servi
 import { FindReactionsByUserService } from './services/findReactionsByUser.service';
 import { RemovePostReactionService } from './services/removePostReaction.service';
 import { FindReactionsByPostAndUserService } from './services/findReactionsByPostAndUser.service';
+import { GetPostReactionsTotalService } from './services/getPostReactionsTotal.service';
 
 @Module({
   controllers: [PostReactionsController, PostReactionsConsumerController],
@@ -21,6 +22,7 @@ import { FindReactionsByPostAndUserService } from './services/findReactionsByPos
     FindReactionsByUserService,
     RemovePostReactionService,
     FindReactionsByPostAndUserService,
+    GetPostReactionsTotalService,
   ],
   imports: [
     MongooseModule.forFeature([
