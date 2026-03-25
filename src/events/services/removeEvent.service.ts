@@ -23,23 +23,23 @@ export class RemoveEventService {
     private readonly usersService: UsersService,
   ) {}
 
-  /**
-   * Delete an event and emit a cancellation notification via RMQ.
-   * Throws NOT_FOUND if the event doesn't exist.
-   */
-  async execute(id: string): Promise<EventDocument> {
+  async execute(id: string, requesterId: string): Promise<EventDocument> {
     const existing = await this.eventModel.findById(id).exec();
     if (!existing) {
       RpcExceptionHelper.notFound('Event', id);
     }
 
+    // ── OWNERSHIP CHECK ─────────────────────────────────────────────────────
+    if (existing.sql_user_id !== requesterId) {
+      RpcExceptionHelper.forbidden('No tienes permiso para eliminar este evento');
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     const removed = await this.eventModel.findByIdAndDelete(id).exec();
 
     const artistRef = await this.usersService.get(removed.sql_user_id);
     const pathBase = removed.eventPathBase || '/events';
-    const normalizedPathBase = pathBase.startsWith('/')
-      ? pathBase
-      : `/${pathBase}`;
+    const normalizedPathBase = pathBase.startsWith('/') ? pathBase : `/${pathBase}`;
     const urlBaseFromDoc = removed.eventUrlBase?.trim() || '';
     const urlBaseFromEnv = this.frontendBaseUrl
       ? `${this.trimTrailingSlash(this.frontendBaseUrl)}${normalizedPathBase}`

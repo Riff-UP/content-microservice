@@ -8,7 +8,7 @@ export class RpcExceptionHelper {
       code: 'NOT_FOUND',
       message: id
         ? `${resource} with id ${id} not found`
-        : `${resource} not found`,
+        : `${resource} not found`,  
     });
   }
 
@@ -40,6 +40,14 @@ export class RpcExceptionHelper {
     throw new RpcException({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       code: 'INTERNAL_SERVER_ERROR',
+      message,
+    });
+  }
+
+  static forbidden(message: string = 'Forbidden') {
+    throw new RpcException({
+      statusCode: 403,
+      code: 'FORBIDDEN',
       message,
     });
   }
