@@ -59,8 +59,9 @@ export class EventAttendanceController {
   }
 
   @MessagePattern('removeEventAttendance')
-  remove(@Payload() payload: { id: string }) {
-    return this.removeEventAttendanceService.execute(payload.id);
+  remove(@Payload() payload: { id: string; userId?: string; requesterId?: string }) {
+    const requesterId = payload.requesterId || payload.userId || '';
+    return this.removeEventAttendanceService.execute(payload.id, requesterId);
   }
 
   @MessagePattern('getEventAttendanceTotal')

@@ -67,8 +67,10 @@ export class EventReviewsController {
   }
 
   @MessagePattern('removeEventReview')
-  remove(@Payload() payload: { id: string }) {
-    return this.removeEventReviewService.execute(payload.id);
+  remove(@Payload() payload: { id: string; userId?: string; requesterId?: string }) {
+    // requesterId viene del JWT via gateway
+    const requesterId = payload.requesterId || payload.userId || '';
+    return this.removeEventReviewService.execute(payload.id, requesterId);
   }
 
   @MessagePattern('findPendingReviews')

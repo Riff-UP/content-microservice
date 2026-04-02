@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  EventAttendance,
-  EventAttendanceDocument,
-} from '../schemas/event-attendance.schema';
+import { EventAttendance, EventAttendanceDocument } from '../schemas/event-attendance.schema';
 import { RpcExceptionHelper } from '../../common/helpers/rpc-exception.helper';
 
 @Injectable()
@@ -16,17 +13,18 @@ export class RemoveEventAttendanceService {
     private readonly attendanceModel: Model<EventAttendanceDocument>,
   ) {}
 
-  /**
-   * Delete an attendance record by its _id.
-   * Throws NOT_FOUND if it doesn't exist.
-   */
-  async execute(id: string): Promise<EventAttendanceDocument> {
-    const removed = await this.attendanceModel.findByIdAndDelete(id).exec();
-
-    if (!removed) {
+  async execute(id: string, requesterId: string): Promise<EventAttendanceDocument> {
+    const existing = await this.attendanceModel.findById(id).exec();
+    if (!existing) {
       RpcExceptionHelper.notFound('EventAttendance', id);
     }
 
+    // ── OWNERSHIP CHECK
+    if (existing.sql_user_id !== requesterId) {
+      RpcExceptionHelper.forbidden('No tienes permiso para eliminar esta asistencia');
+    }
+
+    const removed = await this.attendanceModel.findByIdAndDelete(id).exec();
     this.logger.log(`Attendance removed: ${id}`);
     return removed;
   }

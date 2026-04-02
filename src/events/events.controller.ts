@@ -23,17 +23,11 @@ export class EventsController {
 
   @MessagePattern('createEvent')
   create(@Payload() payload: any) {
-    this.logger.log(
-      `Received createEvent with payload: ${JSON.stringify(payload)}`,
-    );
-
-    // Transform userId to sql_user_id if needed
+    this.logger.log(`Received createEvent: ${JSON.stringify(payload)}`);
     const dto: CreateEventDto = {
       ...payload,
       sql_user_id: payload.sql_user_id || payload.userId,
     };
-
-    this.logger.log(`🔄 Transformed DTO: ${JSON.stringify(dto)}`);
     return this.createEventService.execute(dto);
   }
 
@@ -44,10 +38,7 @@ export class EventsController {
 
   @MessagePattern('findEventsByOrganizer')
   findByOrganizer(@Payload() payload: { organizerId: string }) {
-    // Mapear organizerId (UUID del gateway) a sql_user_id del esquema
-    const sqlUserId = payload.organizerId;
-    this.logger.log(`findEventsByOrganizer - sql_user_id: ${sqlUserId}`);
-    return this.findAllEventsService.byOrganizer(sqlUserId);
+    return this.findAllEventsService.byOrganizer(payload.organizerId);
   }
 
   @MessagePattern('findOneEvent')
@@ -57,22 +48,19 @@ export class EventsController {
 
   @MessagePattern('updateEvent')
   update(@Payload() payload: any) {
-    this.logger.log(
-      `📥 Received updateEvent with payload: ${JSON.stringify(payload)}`,
-    );
-
-    // Transform userId to sql_user_id if needed
+    this.logger.log(`Received updateEvent: ${JSON.stringify(payload)}`);
     const dto: UpdateEventDto = {
       ...payload,
       sql_user_id: payload.sql_user_id || payload.userId,
     };
-
-    this.logger.log(`🔄 Transformed DTO: ${JSON.stringify(dto)}`);
-    return this.updateEventService.execute(dto.id, dto);
+    // requesterId = quien hace la petición (del JWT via gateway)
+    const requesterId = payload.requesterId || payload.userId || '';
+    return this.updateEventService.execute(dto.id, dto, requesterId);
   }
 
   @MessagePattern('removeEvent')
-  remove(@Payload() data: { id: string }) {
-    return this.removeEventService.execute(data.id);
+  remove(@Payload() payload: { id: string; requesterId?: string; userId?: string }) {
+    const requesterId = payload.requesterId || payload.userId || '';
+    return this.removeEventService.execute(payload.id, requesterId);
   }
 }
