@@ -95,3 +95,28 @@ export interface SnapshotExecutionResult {
   workloadIterations: number;
   tokenValidated: boolean;
 }
+
+export interface HypothesisWindowStats {
+  visibility: string | number;
+  interaction: string | number;
+  users: string | number;
+}
+
+export interface HypothesisMetricSummary {
+  pre: number;
+  post: number;
+  changePercent: number;
+  meetsThreshold: boolean;
+}
+
+export interface HypothesisSummaryResponse {
+  from: string;
+  to: string;
+  split: string;
+  thresholdUsed: number;
+  metrics: {
+    visibility: HypothesisMetricSummary;
+    interaction: HypothesisMetricSummary;
+    users: HypothesisMetricSummary;
+  };
+}

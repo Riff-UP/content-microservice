@@ -8,6 +8,7 @@ import { AnalyticsRepository } from './analytics.repository';
 import { TriggerSnapshotDto } from './dto/trigger-snapshot.dto';
 import { TriggerWorkloadDto } from './dto/trigger-workload.dto';
 import { UpsertExperimentConfigDto } from './dto/upsert-experiment-config.dto';
+import { HypothesisSummaryPayload } from './services/metrics.service';
 import { MetricsService } from './services/metrics.service';
 import { OAuthService } from './services/oauth.service';
 import { SnapshotService } from './services/snapshot.service';
@@ -45,6 +46,12 @@ export class AnalyticsController {
   @MessagePattern('content.analytics.summary')
   summary() {
     return this.metricsService.getSummary();
+  }
+
+  @MessagePattern('getAnalyticsHypothesisSummary')
+  @MessagePattern('content.analytics.hypothesis.summary')
+  hypothesisSummary(@Payload() payload: HypothesisSummaryPayload = {}) {
+    return this.metricsService.getHypothesisSummary(payload);
   }
 
   @MessagePattern('findAnalyticsMetrics')

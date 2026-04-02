@@ -7,6 +7,7 @@ import {
   AnalyticsSnapshotRow,
   AnalyticsSummaryRow,
   ExperimentConfigRow,
+  HypothesisWindowStats,
 } from './types';
 
 @Injectable()
@@ -168,6 +169,108 @@ export class AnalyticsRepository {
       `,
       [variableName, variableValue, description],
     );
+  }
+
+  async getHypothesisWindowStats(
+    from: Date,
+    to: Date,
+  ): Promise<HypothesisWindowStats> {
+    const result = await this.pool.query<HypothesisWindowStats>(
+      `
+      SELECT
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_posts p
+          WHERE p.created_at >= $1
+            AND p.created_at < $2
+            AND p.deleted_at IS NULL
+        )
+        +
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_events e
+          WHERE e.created_at >= $1
+            AND e.created_at < $2
+            AND e.cancelled_at IS NULL
+        ) AS visibility,
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_event_attendance a
+          WHERE a.responded_at >= $1
+            AND a.responded_at < $2
+        )
+        +
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_event_reviews r
+          WHERE r.created_at >= $1
+            AND r.created_at < $2
+        )
+        +
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_post_reactions pr
+          WHERE pr.created_at >= $1
+            AND pr.created_at < $2
+        )
+        +
+        (
+          SELECT COUNT(*)
+          FROM analytics.benchmark_saved_posts sp
+          WHERE sp.saved_at >= $1
+            AND sp.saved_at < $2
+        ) AS interaction,
+        (
+          SELECT COUNT(DISTINCT actors.sql_user_id)
+          FROM (
+            SELECT p.author_sql_user_id AS sql_user_id
+            FROM analytics.benchmark_posts p
+            WHERE p.created_at >= $1
+              AND p.created_at < $2
+              AND p.deleted_at IS NULL
+
+            UNION ALL
+
+            SELECT e.creator_sql_user_id AS sql_user_id
+            FROM analytics.benchmark_events e
+            WHERE e.created_at >= $1
+              AND e.created_at < $2
+              AND e.cancelled_at IS NULL
+
+            UNION ALL
+
+            SELECT a.attendee_sql_user_id AS sql_user_id
+            FROM analytics.benchmark_event_attendance a
+            WHERE a.responded_at >= $1
+              AND a.responded_at < $2
+
+            UNION ALL
+
+            SELECT r.reviewer_sql_user_id AS sql_user_id
+            FROM analytics.benchmark_event_reviews r
+            WHERE r.created_at >= $1
+              AND r.created_at < $2
+
+            UNION ALL
+
+            SELECT pr.sql_user_id AS sql_user_id
+            FROM analytics.benchmark_post_reactions pr
+            WHERE pr.created_at >= $1
+              AND pr.created_at < $2
+
+            UNION ALL
+
+            SELECT sp.sql_user_id AS sql_user_id
+            FROM analytics.benchmark_saved_posts sp
+            WHERE sp.saved_at >= $1
+              AND sp.saved_at < $2
+          ) AS actors
+        ) AS users
+      `,
+      [from.toISOString(), to.toISOString()],
+    );
+
+    return result.rows[0];
   }
 
   async executeQuery<T extends QueryResultRow = QueryResultRow>(

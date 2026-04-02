@@ -5,7 +5,18 @@ import {
   AnalyticsSnapshotRow,
   BigQueryMetricRow,
   ExperimentConfigRow,
+  HypothesisMetricSummary,
+  HypothesisSummaryResponse,
+  HypothesisWindowStats,
 } from '../types';
+
+export interface HypothesisSummaryPayload {
+  from?: string;
+  to?: string;
+  split?: string;
+  threshold?: number | string;
+  thresholdUsed?: number | string;
+}
 
 @Injectable()
 export class MetricsService {
@@ -28,6 +39,40 @@ export class MetricsService {
       totalCalls: this.parseIntSafe(summary.total_calls),
       avgMeanExecTimeMs: this.parseFloatSafe(summary.avg_mean_exec_time_ms),
       worstMaxExecTimeMs: this.parseFloatSafe(summary.worst_max_exec_time_ms),
+    };
+  }
+
+  async getHypothesisSummary(
+    payload: HypothesisSummaryPayload = {},
+  ): Promise<HypothesisSummaryResponse> {
+    const from = this.parseDate(payload.from, 'from');
+    const to = this.parseDate(payload.to, 'to');
+
+    if (from.getTime() >= to.getTime()) {
+      throw new Error('El parámetro from debe ser menor que to');
+    }
+
+    const split = this.resolveSplitDate(payload.split, from, to);
+    if (split.getTime() <= from.getTime() || split.getTime() >= to.getTime()) {
+      throw new Error('El split debe estar entre from y to');
+    }
+
+    const threshold = this.parseThreshold(payload.threshold, payload.thresholdUsed);
+    const [preRaw, postRaw] = await Promise.all([
+      this.analyticsRepository.getHypothesisWindowStats(from, split),
+      this.analyticsRepository.getHypothesisWindowStats(split, to),
+    ]);
+
+    return {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      split: split.toISOString(),
+      thresholdUsed: threshold,
+      metrics: {
+        visibility: this.buildMetricSummary(preRaw, postRaw, 'visibility', threshold),
+        interaction: this.buildMetricSummary(preRaw, postRaw, 'interaction', threshold),
+        users: this.buildMetricSummary(preRaw, postRaw, 'users', threshold),
+      },
     };
   }
 
@@ -134,5 +179,74 @@ export class MetricsService {
     const date = value instanceof Date ? value : new Date(value);
     const iso = date.toISOString();
     return iso.slice(0, 19).replace('T', ' ');
+  }
+
+  private parseDate(value: string | undefined, fieldName: string): Date {
+    if (!value) {
+      throw new Error(`Se requiere el parámetro ${fieldName}`);
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new Error(`Fecha inválida para ${fieldName}`);
+    }
+
+    return date;
+  }
+
+  private resolveSplitDate(split: string | undefined, from: Date, to: Date): Date {
+    if (!split || split === 'midpoint') {
+      return new Date((from.getTime() + to.getTime()) / 2);
+    }
+
+    const splitDate = new Date(split);
+    if (Number.isNaN(splitDate.getTime())) {
+      throw new Error('Split inválido. Usa midpoint o una fecha ISO válida');
+    }
+
+    return splitDate;
+  }
+
+  private parseThreshold(
+    threshold: number | string | undefined,
+    thresholdUsed: number | string | undefined,
+  ): number {
+    const parsed = Number.parseFloat(String(threshold ?? thresholdUsed ?? 15));
+    if (Number.isNaN(parsed) || parsed < 0) {
+      return 15;
+    }
+
+    return parsed;
+  }
+
+  private buildMetricSummary(
+    preRaw: HypothesisWindowStats,
+    postRaw: HypothesisWindowStats,
+    key: keyof HypothesisWindowStats,
+    threshold: number,
+  ): HypothesisMetricSummary {
+    const pre = this.parseFloatSafe(preRaw[key]);
+    const post = this.parseFloatSafe(postRaw[key]);
+    const changePercent = this.computeChangePercent(pre, post);
+
+    return {
+      pre,
+      post,
+      changePercent,
+      meetsThreshold: changePercent >= threshold,
+    };
+  }
+
+  private computeChangePercent(pre: number, post: number): number {
+    if (pre === 0) {
+      if (post === 0) {
+        return 0;
+      }
+
+      return 100;
+    }
+
+    const percent = ((post - pre) / pre) * 100;
+    return Number.parseFloat(percent.toFixed(2));
   }
 }
