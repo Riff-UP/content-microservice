@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateSavedPostDto } from './dto/create-saved-post.dto';
 import { CreateSavedPostService } from './services/createSavedPost.service';
 import { FindSavedPostsByUserService } from './services/findSavedPostsByUser.service';
+import { GetPostSavesTotalService } from './services/getPostSavesTotal.service';
 import { RemoveSavedPostService } from './services/removeSavedPost.service';
 import { RemoveSavedPostByPostAndUserService } from './services/removeSavedPostByPostAndUser.service';
 
@@ -31,6 +32,7 @@ export class SavedPostsController {
   constructor(
     private readonly createSavedPostService: CreateSavedPostService,
     private readonly findSavedPostsByUserService: FindSavedPostsByUserService,
+    private readonly getPostSavesTotalService: GetPostSavesTotalService,
     private readonly removeSavedPostService: RemoveSavedPostService,
     private readonly removeSavedPostByPostAndUserService: RemoveSavedPostByPostAndUserService,
   ) {}
@@ -68,6 +70,12 @@ export class SavedPostsController {
     const sql_user_id = extractId(payload?.sql_user_id ?? payload?.userId);
     this.logger.log(`findAllSavedPosts for user: ${sql_user_id}`);
     return this.findSavedPostsByUserService.execute(sql_user_id);
+  }
+
+  @MessagePattern('getPostSavesTotal')
+  getPostSavesTotal(@Payload() payload: SavedPostPayload) {
+    const postId = extractId(payload?.post_id ?? payload?.postId);
+    return this.getPostSavesTotalService.execute(postId);
   }
 
   @MessagePattern('content.savedPosts.remove')

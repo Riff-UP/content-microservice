@@ -7,6 +7,7 @@ import { Post, PostSchema } from '../posts/schemas/post.schema';
 import { UsersModule } from '../users/users.module';
 import { CreateSavedPostService } from './services/createSavedPost.service';
 import { FindSavedPostsByUserService } from './services/findSavedPostsByUser.service';
+import { GetPostSavesTotalService } from './services/getPostSavesTotal.service';
 import { RemoveSavedPostService } from './services/removeSavedPost.service';
 import { RemoveSavedPostByPostAndUserService } from './services/removeSavedPostByPostAndUser.service';
 
@@ -15,6 +16,7 @@ import { RemoveSavedPostByPostAndUserService } from './services/removeSavedPostB
   providers: [
     CreateSavedPostService,
     FindSavedPostsByUserService,
+    GetPostSavesTotalService,
     RemoveSavedPostService,
     RemoveSavedPostByPostAndUserService,
   ],
