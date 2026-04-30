@@ -1,118 +1,81 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Content Microservice
 
-## Nota de arquitectura
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![MongoDB](https://img.shields.io/badge/mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-`content-microservice` **no debe ser consumido directamente por ningún frontend**.
+## 📌 Descripción
 
-La ruta correcta es:
+Microservicio encargado del contenido público de Riff. Gestiona publicaciones, eventos, reacciones, asistencia, reseñas, guardados y analítica, con comunicación síncrona vía TCP y eventos asíncronos por RabbitMQ.
 
-- frontend → `client/front-gateway` por HTTP
-- `client/front-gateway` → `content-microservice` por TCP / RPC
+## Problema que resuelve
 
-Esto aplica también para `analytics`: el frontend no debe usar el puerto HTTP de este microservicio como API pública.
+content-ms concentra toda la lógica de contenido para evitar que el gateway o el frontend conozcan detalles internos de persistencia, replicación o validación. También mantiene consistencia entre usuarios, publicaciones y eventos mediante eventos de dominio y réplicas locales.
 
-## Analytics PostgreSQL separado (opción A)
+## Responsabilidades principales
 
-El módulo `analytics` de este servicio debe usar una **base PostgreSQL separada**, distinta a cualquier DB de `users-ms`.
+- Crear, consultar, actualizar y eliminar posts.
+- Gestionar eventos públicos y sus cambios de estado.
+- Manejar reacciones, guardados, asistencia y reseñas.
+- Replicar usuarios para validar publicaciones con ECST.
+- Publicar eventos de dominio hacia otros servicios.
+- Registrar métricas y snapshots de analytics cuando el módulo está habilitado.
 
-Referencia de configuración:
-- variable principal: `ANALYTICS_DB_URL`
-- local por Docker: servicio `analytics-db` en `docker-compose.yml`
-- despliegue: usar un Postgres dedicado para analytics y correr `npm run analytics:migrate`
+## Flujo principal
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+```text
+Gateway -> content-ms -> MongoDB
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+content-ms -> RabbitMQ -> otros servicios
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+auth.tokenGenerated -> replica UserRef
+createPost -> valida UserRef -> guarda post
+post.created / event.created -> notifica por eventos
 ```
 
-## Compile and run the project
+El servicio usa una réplica local de usuario para validar operaciones antes de persistir contenido. Si la réplica aún no existe, reintenta brevemente antes de fallar.
+
+## Modelo de datos
+
+El dominio se organiza principalmente en colecciones y tablas de apoyo para contenido público:
+
+- `Post`: publicaciones del feed.
+- `Event`: eventos creados por artistas.
+- `UserRef`: réplica de usuario para validación local.
+- `SavedPost`: publicaciones guardadas por usuarios.
+- `PostReaction`: reacciones sobre publicaciones.
+- `EventAttendance` y `EventReview`: asistencia y reseñas.
+
+## Comunicación con otros servicios
+
+- TCP para operaciones solicitadas por el gateway.
+- RabbitMQ para eventos como `auth.tokenGenerated`, `post.created`, `event.created` y `user.deactivated`.
+- MongoDB como base principal del dominio de contenido.
+- PostgreSQL dedicado para analytics cuando el módulo está activo.
+
+## Decisiones técnicas
+
+- ECST para validar usuarios sin acoplarse al microservicio de identidad.
+- MongoDB para flexibilidad en publicaciones, eventos y relaciones de contenido.
+- PostgreSQL separado para analytics, evitando mezclar cargas transaccionales con métricas.
+- El frontend no consume este servicio directamente; siempre entra por el gateway.
+
+## Desarrollo local
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev
 ```
 
-## Run tests
+## Pruebas
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test
+npm run test:e2e
 ```
 
-## Deployment
+## Relación con el sistema
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Este microservicio resuelve la capa de contenido de la plataforma. Su valor está en manejar publicaciones y eventos con independencia del gateway, manteniendo la lógica de negocio y la persistencia bien separadas.
