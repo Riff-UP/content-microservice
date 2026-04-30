@@ -33,11 +33,10 @@ export class UpdateEventService {
       RpcExceptionHelper.notFound('Event', id);
     }
 
-    // ── OWNERSHIP CHECK ─────────────────────────────────────────────────────
+    // ── OWNERSHIP CHECK
     if (existing.sql_user_id !== requesterId) {
       RpcExceptionHelper.forbidden('No tienes permiso para modificar este evento');
     }
-    // ────────────────────────────────────────────────────────────────────────
 
     const updated = await this.eventModel
       .findByIdAndUpdate(id, dto, { returnDocument: 'after' })
